@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>What HashiCorp Vault actually costs — TCO calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-dark: #111111;
+    --bg-page: #f3f4f6;
+    --text: #000000;
+    --text-subtle: #737373;
+    --text-on-dark: #e4e4e7;
+    --text-on-dark-subtle: #a1a1aa;
+    --volt: #dbf530;
+    --border: #dcdcdc;
+    --border-dark: #2a2a2a;
+    --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+    --font: 'Alliance No.2', Inter, system-ui, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  ::selection { background: var(--volt); color: #000; }
+
+  html { -webkit-font-smoothing: antialiased; }
+  body {
+    font-family: var(--font);
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.5;
+  }
+
+  .mono { font-family: var(--mono); }
+  .label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+  }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 40px; }
+
+  /* ---------- Hero ---------- */
+  header.hero {
+    background: var(--bg-dark);
+    color: var(--text-on-dark);
+    border-bottom: 1px solid var(--border-dark);
+    padding: 68px 0 56px;
+  }
+  .hero .eyebrow { color: var(--text-on-dark-subtle); margin-bottom: 20px; }
+  .hero h1 {
+    font-weight: 500;
+    font-size: clamp(36px, 5vw, 56px);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    max-width: 16ch;
+  }
+  .hero h1 .mark { background: var(--volt); color: #000; padding: 0 6px; }
+  .hero p.sub {
+    margin-top: 24px;
+    max-width: 58ch;
+    font-size: 18px;
+    color: var(--text-on-dark);
+  }
+  .hero p.sub a { color: var(--volt); text-decoration: none; border-bottom: 1px solid var(--border-dark); }
+
+  /* ---------- Layout ---------- */
+  main { background: var(--bg-page); padding: 40px 0 80px; }
+  .grid {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  @media (max-width: 980px) { .grid { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 28px;
+  }
+  .panel h2 {
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: 0.01em;
+    margin-bottom: 4px;
+  }
+  .panel .panel-note { color: var(--text-subtle); font-size: 13px; margin-bottom: 24px; }
+
+  /* ---------- Controls ---------- */
+  .field { margin-bottom: 22px; }
+  .field > .label { display: block; margin-bottom: 8px; }
+
+  .seg { display: flex; border: 1px solid var(--border); }
+  .seg button {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-right: 1px solid var(--border);
+    padding: 9px 6px;
+    font-family: var(--font);
+    font-size: 13px;
+    color: var(--text-subtle);
+    cursor: pointer;
+    transition: color .15s var(--ease), background .15s var(--ease);
+  }
+  .seg button:last-child { border-right: none; }
+  .seg button:hover { color: var(--text); }
+  .seg button[aria-pressed="true"] { background: var(--text); color: #fff; }
+
+  select, input[type="number"] {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 0;
+    padding: 10px 12px;
+    font-family: var(--font);
+    font-size: 14px;
+    color: var(--text);
+  }
+  select:focus-visible, input:focus-visible { border-color: #000; outline: none; }
+
+  .slider-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+  .slider-val { font-family: var(--mono); font-size: 14px; font-weight: 600; }
+  input[type="range"] {
+    -webkit-appearance: none; appearance: none;
+    width: 100%; height: 1px; background: var(--border); cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 16px; height: 16px; background: #000; border-radius: 0; cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 16px; height: 16px; background: #000; border: none; border-radius: 0; cursor: pointer;
+  }
+  .hint { font-size: 12px; color: var(--text-subtle); margin-top: 6px; }
+  .reset {
+    margin-top: 4px; background: transparent; border: 1px solid var(--border);
+    padding: 8px 14px; font-family: var(--font); font-size: 13px; color: var(--text-subtle);
+    cursor: pointer; transition: color .15s var(--ease), border-color .15s var(--ease);
+  }
+  .reset:hover { color: #000; border-color: #000; }
+  .stack { display: flex; flex-direction: column; gap: 0; }
+  .hidden { display: none !important; }
+
+  /* transparent assumptions summary */
+  .assumptions { border: 1px solid var(--border); padding: 18px; margin-top: 4px; }
+  .assumptions > .label { display: block; margin-bottom: 8px; }
+  .assumptions ul { list-style: none; }
+  .assumptions li { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 8px 0; border-bottom: 1px solid #efefef; font-size: 13px; }
+  .assumptions li:last-child { border-bottom: none; }
+  .assumptions li span { color: var(--text-subtle); }
+  .assumptions li b { font-family: var(--mono); font-weight: 600; text-align: right; }
+  .assumptions .reset { width: 100%; margin-top: 16px; }
+
+  /* ---------- Results ---------- */
+  .result-top {
+    background: var(--bg-dark); color: var(--text-on-dark);
+    border: 1px solid var(--border-dark); padding: 36px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 28px;
+  }
+  @media (max-width: 620px) { .result-top { grid-template-columns: 1fr; } }
+  .bignum { font-family: var(--mono); font-weight: 600; line-height: 1; }
+  .result-top .label { color: var(--text-on-dark-subtle); margin-bottom: 12px; }
+  .vault-num { font-size: clamp(34px, 5vw, 52px); }
+  .vault-num .yr { font-size: 16px; color: var(--text-on-dark-subtle); }
+  .delta-box { border-left: 1px solid var(--border-dark); padding-left: 28px; }
+  @media (max-width: 620px) { .delta-box { border-left: none; padding-left: 0; border-top: 1px solid var(--border-dark); padding-top: 24px; } }
+  .delta-num { font-size: clamp(28px, 4vw, 40px); }
+  .delta-num .mk { background: var(--volt); color: #000; padding: 0 6px; }
+  .delta-sub { color: var(--text-on-dark-subtle); font-size: 13px; margin-top: 10px; max-width: 34ch; }
+
+  /* breakdown bars */
+  .breakdown { margin-top: 24px; }
+  .bar-track { display: flex; height: 44px; border: 1px solid var(--border); overflow: hidden; }
+  .bar-seg { height: 100%; transition: width .3s var(--ease); position: relative; }
+  .legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px 24px; margin-top: 20px; }
+  .legend-item { display: flex; align-items: baseline; gap: 10px; }
+  .swatch { width: 12px; height: 12px; flex: none; transform: translateY(1px); border: 1px solid rgba(0,0,0,.15); }
+  .legend-item .li-label { font-size: 14px; }
+  .legend-item .li-val { font-family: var(--mono); font-size: 13px; margin-left: auto; padding-left: 12px; }
+  .legend-item .li-pct { font-family: var(--mono); font-size: 11px; color: var(--text-subtle); }
+  .src-tag { font-family: var(--mono); font-size: 10px; letter-spacing: .03em; padding: 1px 4px; border: 1px solid var(--border); color: var(--text-subtle); }
+  .src-tag.assumed { border-style: dashed; }
+
+  /* 3-year table */
+  table.years { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  table.years th, table.years td { text-align: right; padding: 10px 12px; font-family: var(--mono); font-size: 13px; border-bottom: 1px solid var(--border); }
+  table.years th { color: var(--text-subtle); font-weight: 400; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
+  table.years td:first-child, table.years th:first-child { text-align: left; font-family: var(--font); }
+  table.years tr.total td { font-weight: 600; border-bottom: none; border-top: 1px solid #000; }
+
+  .callout {
+    border-left: 2px solid var(--volt); padding: 4px 0 4px 18px; margin-top: 24px;
+    font-size: 15px; color: var(--text);
+  }
+
+  /* footnotes */
+  .notes { margin-top: 40px; border-top: 1px solid var(--border); padding-top: 28px; }
+  .notes h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+  .notes ol { list-style: none; counter-reset: fn; }
+  .notes li { counter-increment: fn; position: relative; padding-left: 34px; margin-bottom: 14px; font-size: 13px; color: var(--text-subtle); max-width: 90ch; }
+  .notes li::before {
+    content: counter(fn); position: absolute; left: 0; top: 0;
+    font-family: var(--mono); font-size: 11px; width: 22px; height: 22px;
+    border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--text);
+  }
+  .notes li.sourced::before { border-color: #000; }
+  .notes a { color: #000; text-decoration: underline; text-underline-offset: 2px; }
+  sup a { font-family: var(--mono); font-size: 10px; text-decoration: none; color: var(--text-subtle); border: 1px solid var(--border); padding: 0 3px; margin-left: 4px; }
+
+  .section-title { margin: 32px 0 14px; }
+  footer.foot { background: var(--bg-dark); color: var(--text-on-dark-subtle); padding: 28px 0; font-size: 12px; }
+  footer.foot a { color: var(--text-on-dark); }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="label eyebrow">Total cost of ownership · HashiCorp Vault</div>
+    <h1>What HashiCorp Vault <span class="mark">actually</span> costs</h1>
+    <p class="sub">The cluster bill is the part you can see. The real spend is the engineers who run it and the months it takes to get to production. This estimates all of it — using <a href="https://infisical.com/blog/hashicorp-vault-pricing" target="_blank" rel="noopener">HashiCorp's published pricing</a> where it exists and clearly-flagged, conservative assumptions where it doesn't.</p>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="grid">
+
+      <!-- ============ INPUTS ============ -->
+      <section class="panel" aria-label="Inputs">
+        <h2>Estimate for</h2>
+        <p class="panel-note">Pick the closest match. We fill in sensible assumptions — change any of them if you want.</p>
+
+        <div class="field">
+          <span class="label">Company stage</span>
+          <div class="seg" id="seg-stage" role="group" aria-label="Company stage">
+            <button data-stage="startup" aria-pressed="false">Startup</button>
+            <button data-stage="midmarket" aria-pressed="true">Mid-market</button>
+            <button data-stage="enterprise" aria-pressed="false">Enterprise</button>
+          </div>
+          <p class="hint" id="stage-hint"></p>
+        </div>
+
+        <div class="field">
+          <span class="label">Which Vault</span>
+          <div class="seg" id="seg-deploy" role="group" aria-label="Deployment model">
+            <button data-deploy="hcp" aria-pressed="true">HCP managed</button>
+            <button data-deploy="enterprise" aria-pressed="false">Self-hosted</button>
+            <button data-deploy="community" aria-pressed="false">Community</button>
+          </div>
+          <p class="hint" id="deploy-hint"></p>
+        </div>
+
+        <!-- transparent assumptions: the default view -->
+        <div class="assumptions" id="assumptions">
+          <span class="label">What we assume for this profile</span>
+          <ul id="assume-list"></ul>
+          <button class="reset" id="customize-toggle">Customize these →</button>
+        </div>
+
+        <!-- advanced editable controls, hidden until "Customize" -->
+        <div id="advanced" class="hidden">
+          <div class="field hcp-only">
+            <span class="label">HCP tier</span>
+            <div class="seg" id="seg-tier" role="group" aria-label="HCP tier">
+              <button data-tier="essentials" aria-pressed="false">Essentials</button>
+              <button data-tier="standard" aria-pressed="true">Standard</button>
+            </div>
+          </div>
+
+          <div class="field hcp-only">
+            <span class="label">Cluster size</span>
+            <select id="cluster-size">
+              <option value="small">Small</option>
+              <option value="medium">Medium</option>
+              <option value="large">Large</option>
+            </select>
+          </div>
+
+          <div class="field hcp-only">
+            <div class="slider-row">
+              <span class="label">Per-client fee / mo</span>
+              <span class="slider-val" id="perclient-val"></span>
+            </div>
+            <input type="range" id="perclient" min="0" max="200" step="1" />
+            <p class="hint">HCP list is $72.92. Negotiated and Enterprise per-client rates vary — often higher.</p>
+          </div>
+
+          <div class="field hcp-only">
+            <div class="slider-row">
+              <span class="label">Client-period multiplier</span>
+              <span class="slider-val" id="periodmult-val"></span>
+            </div>
+            <input type="range" id="periodmult" min="1" max="12" step="1" />
+            <p class="hint">HCP can count a client for every active period, not once. 1× = unique clients.</p>
+          </div>
+
+          <div class="field">
+            <div class="slider-row">
+              <span class="label">Clients (apps, services, users)</span>
+              <span class="slider-val" id="clients-val"></span>
+            </div>
+            <input type="range" id="clients" min="5" max="3000" step="5" />
+            <p class="hint">Anything that authenticates to Vault. Drives the per-client fee.</p>
+          </div>
+
+          <div class="field">
+            <div class="slider-row">
+              <span class="label" id="clusters-label">Clusters / environments</span>
+              <span class="slider-val" id="clusters-val"></span>
+            </div>
+            <input type="range" id="clusters" min="1" max="12" step="1" />
+            <p class="hint">Prod, non-prod, and per-region replicas each multiply infrastructure.</p>
+          </div>
+
+          <div class="field">
+            <div class="slider-row">
+              <span class="label">Engineers dedicated to Vault (FTE)</span>
+              <span class="slider-val" id="fte-val"></span>
+            </div>
+            <input type="range" id="fte" min="0" max="12" step="0.25" />
+            <p class="hint">Running and maintaining Vault. Fractional is fine.</p>
+          </div>
+
+          <div class="field">
+            <div class="slider-row">
+              <span class="label">Fully-loaded engineer cost / yr</span>
+              <span class="slider-val" id="salary-val"></span>
+            </div>
+            <input type="range" id="salary" min="120000" max="350000" step="5000" />
+            <p class="hint">Base + benefits + overhead.</p>
+          </div>
+
+          <div class="field">
+            <div class="slider-row">
+              <span class="label">Effort spent on upgrades &amp; maintenance</span>
+              <span class="slider-val" id="maintshare-val"></span>
+            </div>
+            <input type="range" id="maintshare" min="0" max="80" step="5" />
+            <p class="hint">Share of the engineering time consumed by upgrades, patching, and DR — the most-cited Vault burden.</p>
+          </div>
+
+          <div class="field">
+            <div class="slider-row">
+              <span class="label">Time to production (0→1)</span>
+              <span class="slider-val" id="onboard-val"></span>
+            </div>
+            <input type="range" id="onboard" min="0" max="12" step="0.5" />
+            <p class="hint">One-time ramp, charged in year 1.</p>
+          </div>
+
+          <div class="field">
+            <div class="slider-row">
+              <span class="label">Professional services / onboarding fee</span>
+              <span class="slider-val" id="psfee-val"></span>
+            </div>
+            <input type="range" id="psfee" min="0" max="100000" step="5000" />
+            <p class="hint">One-time, charged in year 1. Vendors commonly attach these to enterprise deployments.</p>
+          </div>
+
+          <div class="field">
+            <div class="slider-row">
+              <span class="label">Renewal / hidden-cost uplift</span>
+              <span class="slider-val" id="uplift-val"></span>
+            </div>
+            <input type="range" id="uplift" min="0" max="120" step="5" />
+            <p class="hint">Procurement data shows 25–60% at renewal — and real cases run higher. Default is the floor.</p>
+          </div>
+
+          <div class="field">
+            <div class="slider-row">
+              <span class="label">Annual growth (clients & team)</span>
+              <span class="slider-val" id="growth-val"></span>
+            </div>
+            <input type="range" id="growth" min="0" max="60" step="5" />
+            <p class="hint">Applied across the 3-year view.</p>
+          </div>
+
+          <div style="display:flex; gap:10px;">
+            <button class="reset" id="reset" style="flex:1;">Reset to preset</button>
+            <button class="reset" id="collapse" style="flex:1;">Done →</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ RESULTS ============ -->
+      <section aria-label="Results" class="stack" style="gap:24px;">
+
+        <div class="result-top">
+          <div>
+            <div class="label">Estimated annual TCO · year 1</div>
+            <div class="bignum vault-num" id="vault-total">—</div>
+            <div class="delta-sub" id="vault-mode-line"></div>
+          </div>
+          <div class="delta-box">
+            <div class="label">Versus Infisical</div>
+            <div class="bignum delta-num"><span class="mk" id="delta-amount">—</span></div>
+            <div class="delta-sub" id="delta-line"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Where the money goes</h2>
+          <p class="panel-note">Year 1, by cost category. The line item you were quoted is rarely the largest.</p>
+          <div class="bar-track" id="bar-track"></div>
+          <div class="legend" id="legend"></div>
+          <div class="callout" id="callout"></div>
+        </div>
+
+        <div class="panel">
+          <h2>Three-year projection</h2>
+          <p class="panel-note">With growth compounding clients and team. Onboarding hits year 1 only.</p>
+          <table class="years" id="years-table"></table>
+        </div>
+
+        <div class="notes" id="notes">
+          <h3>How these numbers are built</h3>
+          <p class="panel-note" style="margin-bottom:18px;">Solid markers are taken from published pricing. Dashed markers are assumptions — adjust the inputs to match your reality.</p>
+          <ol id="notes-list"></ol>
+        </div>
+
+      </section>
+    </div>
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    Prototype · figures are estimates for evaluation, not a quote. Sourced pricing from
+    <a href="https://infisical.com/blog/hashicorp-vault-pricing" target="_blank" rel="noopener">HashiCorp Vault Pricing: Complete Guide</a>.
+  </div>
+</footer>
+
+<script>
+/* =========================================================================
+   COST MODEL  —  single source of truth. Edit defaults here.
+   ========================================================================= */
+const MODEL = {
+  // --- HCP Vault Dedicated, published monthly cluster cost (sourced) ---
+  hcpCluster: {
+    essentials: { small: 1152, medium: 2307, large: 5468 },
+    standard:   { small: 1345, medium: 2694, large: 6870 },
+  },
+  perClientMonth: 72.92,            // sourced: $72.92 / client / mo (Essentials & Standard)
+
+  // --- Self-hosted Vault Enterprise license (assumed; no public price) ---
+  // no public list price -> base + modest per-client scaling (placeholder)
+  entLicenseBase: 100000,
+  entLicensePerClient: 120,         // assumed annual uplift per client
+
+  // --- Self-hosted infrastructure per cluster (assumed) ---
+  selfHostInfraMonthPerCluster: 1500,  // 3-node HA + LB + storage + backup
+
+  // --- Stage presets ---
+  presets: {
+    startup:    { clients: 25,  clusters: 1, fte: 0.5, onboard: 1.5, clusterSize: 'small',  psFee: 0     },
+    midmarket:  { clients: 150, clusters: 2, fte: 2,   onboard: 3,   clusterSize: 'medium', psFee: 15000 },
+    enterprise: { clients: 800, clusters: 4, fte: 4,   onboard: 6,   clusterSize: 'large',  psFee: 35000 },
+  },
+
+  // --- Shared defaults ---
+  salaryDefault: 210000,
+  upliftDefault: 25,                // conservative floor; real renewals reach 60%+
+  growthDefault: 20,
+  periodMultiplier: 1,              // HCP can count clients per active period; 1 = unique
+  maintShareDefault: 0.4,           // share of eng time consumed by upgrades/patching/DR
+
+  // --- Infisical comparison side (assumed, conservative) ---
+  infisical: {
+    perIdentityMonth: 18,           // Pro plan, published
+    fteFraction: 0.2,               // Vault ops effort that remains with Infisical
+    onboardMonths: 0.1,             // ~ days, not months
+    enterpriseDiscountAtClients: 250, // above this, assume volume pricing kicks in
+    enterpriseEffectivePerIdentity: 9, // blended effective rate at volume
+  },
+};
+
+const COLORS = {
+  license:   '#111111',
+  infra:     '#737373',
+  people:    '#dbf530',   // engineers — operations
+  maint:     '#9bb524',   // upgrades, patching & DR
+  onboard:   '#b3c728',
+  ps:        '#8a8a8a',   // professional services
+  uplift:    '#c9c9c9',
+};
+
+/* ---------------- state ---------------- */
+let S = {};
+function applyPreset(stage) {
+  const p = MODEL.presets[stage];
+  S = {
+    stage,
+    deploy: 'hcp',
+    tier: 'standard',
+    clusterSize: p.clusterSize,
+    clients: p.clients,
+    clusters: p.clusters,
+    fte: p.fte,
+    salary: MODEL.salaryDefault,
+    onboard: p.onboard,
+    uplift: MODEL.upliftDefault,
+    growth: MODEL.growthDefault,
+    perClient: MODEL.perClientMonth,
+    periodMult: MODEL.periodMultiplier,
+    maintShare: MODEL.maintShareDefault,
+    psFee: p.psFee,
+  };
+}
+
+/* ---------------- compute ---------------- */
+function vaultLicenseAnnual(s, clients) {
+  if (s.deploy === 'hcp') {
+    const cluster = MODEL.hcpCluster[s.tier][s.clusterSize] * s.clusters * 12;
+    const clientFees = clients * s.perClient * s.periodMult * 12;
+    return { license: cluster + clientFees, infra: 0 };
+  }
+  if (s.deploy === 'enterprise') {
+    const license = MODEL.entLicenseBase + clients * MODEL.entLicensePerClient;
+    const infra = MODEL.selfHostInfraMonthPerCluster * s.clusters * 12;
+    return { license, infra };
+  }
+  // community
+  return { license: 0, infra: MODEL.selfHostInfraMonthPerCluster * s.clusters * 12 };
+}
+
+function computeVaultYear(s, yearIndex) {
+  const g = Math.pow(1 + s.growth / 100, yearIndex);
+  const clients = Math.round(s.clients * g);
+  const fte = s.fte * g;
+  const { license, infra } = vaultLicenseAnnual(s, clients);
+  const people = fte * s.salary;
+  const maint = people * s.maintShare;     // portion attributable to upgrades/patching/DR
+  const ops = people - maint;              // steady-state operation
+  const uplift = license * (s.uplift / 100);
+  const onboard = yearIndex === 0 ? s.fte * s.salary * (s.onboard / 12) : 0;
+  const ps = yearIndex === 0 ? s.psFee : 0;
+  const total = license + infra + people + uplift + onboard + ps;
+  return { clients, fte, license, infra, people, ops, maint, uplift, onboard, ps, total };
+}
+
+function computeInfisicalYear(s, yearIndex) {
+  const g = Math.pow(1 + s.growth / 100, yearIndex);
+  const clients = Math.round(s.clients * g);
+  const inf = MODEL.infisical;
+  const rate = clients > inf.enterpriseDiscountAtClients ? inf.enterpriseEffectivePerIdentity : inf.perIdentityMonth;
+  const license = clients * rate * 12;
+  const people = s.fte * inf.fteFraction * s.salary;
+  const onboard = yearIndex === 0 ? s.fte * inf.fteFraction * s.salary * (inf.onboardMonths / 12) : 0;
+  return { license, people, onboard, total: license + people + onboard };
+}
+
+/* ---------------- format ---------------- */
+const fmt$ = n => '$' + Math.round(n).toLocaleString('en-US');
+const fmt$k = n => n >= 1000 ? '$' + (Math.round(n / 100) / 10).toLocaleString('en-US') + 'k' : '$' + Math.round(n);
+
+/* ---------------- render ---------------- */
+function render() {
+  // sync visibility
+  document.querySelectorAll('.hcp-only').forEach(el => el.classList.toggle('hidden', S.deploy !== 'hcp'));
+  const sh = { startup: 'Early team, a handful of services, a single environment.',
+               midmarket: 'Several teams and environments, a growing platform footprint.',
+               enterprise: 'Many teams, multiple regions, strict uptime and compliance needs.' };
+  document.getElementById('stage-hint').textContent = sh[S.stage];
+  const dh = { hcp: 'Single-tenant managed cloud. You pay for the cluster plus a per-client fee.',
+               enterprise: 'The same Vault binary on your own infrastructure. License is not public — we estimate it.',
+               community: 'Free license. You still pay for infrastructure and the team that runs it.' };
+  document.getElementById('deploy-hint').textContent = dh[S.deploy];
+  document.getElementById('clusters-label').textContent = S.deploy === 'hcp' ? 'Clusters' : 'Clusters / environments';
+
+  const y1 = computeVaultYear(S, 0);
+  const inf1 = computeInfisicalYear(S, 0);
+
+  // top numbers
+  document.getElementById('vault-total').innerHTML = fmt$(y1.total) + ' <span class="yr">/ yr</span>';
+  const modeName = { hcp: 'HCP Vault Dedicated · ' + cap(S.tier), enterprise: 'Vault Enterprise · self-hosted', community: 'Vault Community · self-hosted' }[S.deploy];
+  document.getElementById('vault-mode-line').textContent = modeName + ' · ' + y1.clients.toLocaleString() + ' clients · ' + trimNum(S.fte) + ' FTE';
+
+  const delta = y1.total - inf1.total;
+  const mult = inf1.total > 0 ? y1.total / inf1.total : 0;
+  document.getElementById('delta-amount').textContent = fmt$(Math.abs(delta)) + (delta >= 0 ? ' less' : ' more') + ' / yr';
+  document.getElementById('delta-line').textContent =
+    'Infisical estimated at ' + fmt$(inf1.total) + '/yr for the same scale — about ' +
+    (mult >= 1 ? mult.toFixed(1) + '× lower' : (1/mult).toFixed(1) + '× higher') +
+    '. Mostly fewer engineers and days-not-months to value.';
+
+  // breakdown
+  const segs = [
+    { key: 'license', label: S.deploy === 'community' ? 'License (free)' : 'License / subscription', val: y1.license, src: S.deploy === 'hcp' ? 'sourced' : 'assumed' },
+    { key: 'infra',   label: 'Infrastructure', val: y1.infra, src: 'assumed' },
+    { key: 'people',  label: 'Engineers — operations', val: y1.ops, src: 'assumed' },
+    { key: 'maint',   label: 'Upgrades, patching & DR', val: y1.maint, src: 'assumed' },
+    { key: 'onboard', label: 'Onboarding (0→1, yr 1)', val: y1.onboard, src: 'assumed' },
+    { key: 'ps',      label: 'Professional services (yr 1)', val: y1.ps, src: 'assumed' },
+    { key: 'uplift',  label: 'Renewal / hidden uplift', val: y1.uplift, src: 'sourced' },
+  ].filter(s => s.val > 0);
+
+  const bar = document.getElementById('bar-track');
+  const legend = document.getElementById('legend');
+  bar.innerHTML = ''; legend.innerHTML = '';
+  segs.forEach(s => {
+    const pct = (s.val / y1.total) * 100;
+    const d = document.createElement('div');
+    d.className = 'bar-seg'; d.style.width = pct + '%'; d.style.background = COLORS[s.key];
+    d.title = s.label + ' · ' + fmt$(s.val);
+    bar.appendChild(d);
+
+    const li = document.createElement('div');
+    li.className = 'legend-item';
+    li.innerHTML =
+      '<span class="swatch" style="background:' + COLORS[s.key] + '"></span>' +
+      '<span class="li-label">' + s.label + ' <span class="src-tag ' + (s.src === 'assumed' ? 'assumed' : '') + '">' + s.src + '</span></span>' +
+      '<span class="li-val">' + fmt$(s.val) + ' <span class="li-pct">' + pct.toFixed(0) + '%</span></span>';
+    legend.appendChild(li);
+  });
+
+  // callout — the insight
+  const peoplePct = ((y1.people + y1.onboard) / y1.total) * 100;
+  const maintPct = ((y1.maint + y1.onboard) / y1.total) * 100;
+  const licPct = (y1.license / y1.total) * 100;
+  document.getElementById('callout').innerHTML =
+    'People and ramp are <strong>' + peoplePct.toFixed(0) + '%</strong> of year-one cost — of which upgrades, patching, DR and initial ramp alone are <strong>' + maintPct.toFixed(0) + '%</strong>' +
+    (S.deploy !== 'community' ? '. The license you actually get quoted is <strong>' + licPct.toFixed(0) + '%</strong>.' : '. The "free" tier still costs ' + fmt$(y1.total) + '/yr to operate.');
+
+  // 3-year table
+  const tbl = document.getElementById('years-table');
+  let grand = 0, grandInf = 0;
+  let rows = '<tr><th>Year</th><th>Clients</th><th>Vault TCO</th><th>Infisical</th><th>You save</th></tr>';
+  for (let i = 0; i < 3; i++) {
+    const v = computeVaultYear(S, i);
+    const f = computeInfisicalYear(S, i);
+    grand += v.total; grandInf += f.total;
+    rows += '<tr><td>Year ' + (i + 1) + '</td><td>' + v.clients.toLocaleString() + '</td><td>' +
+      fmt$(v.total) + '</td><td>' + fmt$(f.total) + '</td><td>' + fmt$(v.total - f.total) + '</td></tr>';
+  }
+  rows += '<tr class="total"><td>3-year total</td><td></td><td>' + fmt$(grand) + '</td><td>' +
+    fmt$(grandInf) + '</td><td>' + fmt$(grand - grandInf) + '</td></tr>';
+  tbl.innerHTML = rows;
+
+  renderAssumptions();
+  renderNotes();
+  syncControls();
+}
+
+function renderAssumptions() {
+  const rows = [];
+  if (S.deploy === 'hcp') rows.push(['Product', 'HCP Dedicated · ' + cap(S.tier) + ' · ' + cap(S.clusterSize)]);
+  else if (S.deploy === 'enterprise') rows.push(['Product', 'Vault Enterprise · self-hosted']);
+  else rows.push(['Product', 'Vault Community · self-hosted']);
+  rows.push(['Clients', '~' + S.clients.toLocaleString()]);
+  if (S.deploy === 'hcp') rows.push(['Per-client fee', '$' + S.perClient.toFixed(2) + '/mo' + (S.periodMult > 1 ? ' ×' + S.periodMult : '')]);
+  rows.push([S.deploy === 'hcp' ? 'Clusters' : 'Clusters / envs', S.clusters]);
+  rows.push(['Engineers', trimNum(S.fte) + ' FTE @ ' + fmt$k(S.salary)]);
+  rows.push(['Upgrades & maint.', Math.round(S.maintShare * 100) + '% of eng time']);
+  rows.push(['Time to production', S.onboard === 0 ? 'instant' : trimNum(S.onboard) + ' mo']);
+  if (S.psFee > 0) rows.push(['Pro services (yr 1)', fmt$k(S.psFee)]);
+  rows.push(['Renewal uplift', S.uplift + '%']);
+  rows.push(['Annual growth', S.growth + '%']);
+  document.getElementById('assume-list').innerHTML =
+    rows.map(([k, v]) => '<li><span>' + k + '</span><b>' + v + '</b></li>').join('');
+}
+
+function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+function trimNum(n){ return Number.isInteger(n) ? n : n.toFixed(2).replace(/0$/,''); }
+
+function renderNotes() {
+  const inf = MODEL.infisical;
+  const notes = [
+    { src: true,  html: 'HCP Vault Dedicated cluster pricing and the <strong>$72.92 per-client monthly fee</strong> are taken from <a href="https://infisical.com/blog/hashicorp-vault-pricing" target="_blank" rel="noopener">HashiCorp\'s published pricing</a>. The per-client fee is editable, and negotiated or Enterprise rates often run higher.' },
+    { src: false, html: 'HCP can count a client for <strong>every active period</strong> rather than once. The client-period multiplier (default 1×) models that amplifier — set it above 1 if usage is intermittent.' },
+    { src: true,  html: 'The <strong>25–60% renewal / hidden-cost uplift</strong> reflects independent procurement data cited in the same pricing breakdown. The default applies the conservative 25% floor; real renewals are frequently higher.' },
+    { src: false, html: 'Engineering cost is split into <strong>steady-state operations</strong> and <strong>upgrades, patching &amp; DR</strong> — the latter is the most frequently cited ongoing Vault burden. The default attributes 40% of engineering time to it.' },
+    { src: false, html: 'Vault Enterprise self-hosted license is <strong>estimated</strong> — HashiCorp publishes no list price. We model a baseline plus a modest per-client uplift as a placeholder. Replace it with your actual quote.' },
+    { src: false, html: 'Self-hosted infrastructure is <strong>estimated</strong> per cluster (a high-availability node cluster plus load balancer, storage, and backups).' },
+    { src: false, html: 'Fully-loaded engineer cost is an <strong>estimate</strong> (base plus benefits and overhead). FTE counts are deliberately conservative for each profile.' },
+    { src: false, html: 'Onboarding (0→1) and any <strong>professional-services / onboarding fee</strong> are charged once, in year 1. Larger, multi-environment deployments commonly take several months to reach production and often carry an implementation fee.' },
+    { src: false, html: 'The Infisical comparison uses the published <strong>Pro per-identity rate</strong> (blended lower at volume), a <strong>fraction of the Vault operating headcount</strong>, and onboarding in days rather than months. These are deliberately conservative; enterprise pricing is custom.' },
+  ];
+  document.getElementById('notes-list').innerHTML = notes.map(n =>
+    '<li class="' + (n.src ? 'sourced' : '') + '">' + n.html + '</li>').join('');
+}
+
+/* ---------------- controls wiring ---------------- */
+function syncControls() {
+  setSeg('seg-stage', 'stage', S.stage);
+  setSeg('seg-deploy', 'deploy', S.deploy);
+  setSeg('seg-tier', 'tier', S.tier);
+  document.getElementById('cluster-size').value = S.clusterSize;
+  setRange('clients', S.clients, v => v.toLocaleString());
+  setRange('clusters', S.clusters, v => v);
+  setRange('perclient', S.perClient, v => '$' + Number(v).toFixed(2));
+  setRange('periodmult', S.periodMult, v => v + '×');
+  setRange('fte', S.fte, v => trimNum(v) + ' FTE');
+  setRange('salary', S.salary, v => fmt$k(v));
+  setRange('maintshare', Math.round(S.maintShare * 100), v => v + '%');
+  setRange('onboard', S.onboard, v => v === 0 ? 'instant' : trimNum(v) + ' mo');
+  setRange('psfee', S.psFee, v => Number(v) === 0 ? 'none' : fmt$k(v));
+  setRange('uplift', S.uplift, v => v + '%');
+  setRange('growth', S.growth, v => v + '% / yr');
+}
+function setSeg(id, attr, val) {
+  document.querySelectorAll('#' + id + ' button').forEach(b =>
+    b.setAttribute('aria-pressed', b.dataset[attr] === val ? 'true' : 'false'));
+}
+function setRange(id, val, fmt) {
+  document.getElementById(id).value = val;
+  document.getElementById(id + '-val').textContent = fmt(val);
+}
+
+function wire() {
+  document.querySelectorAll('#seg-stage button').forEach(b =>
+    b.addEventListener('click', () => { applyPreset(b.dataset.stage); render(); }));
+  document.querySelectorAll('#seg-deploy button').forEach(b =>
+    b.addEventListener('click', () => { S.deploy = b.dataset.deploy; render(); }));
+  document.querySelectorAll('#seg-tier button').forEach(b =>
+    b.addEventListener('click', () => { S.tier = b.dataset.tier; render(); }));
+  document.getElementById('cluster-size').addEventListener('change', e => { S.clusterSize = e.target.value; render(); });
+  const bind = (id, key, parse) => document.getElementById(id).addEventListener('input', e => { S[key] = parse(e.target.value); render(); });
+  bind('clients', 'clients', Number);
+  bind('perclient', 'perClient', Number);
+  bind('periodmult', 'periodMult', Number);
+  bind('clusters', 'clusters', Number);
+  bind('fte', 'fte', Number);
+  bind('salary', 'salary', Number);
+  bind('onboard', 'onboard', Number);
+  bind('psfee', 'psFee', Number);
+  bind('uplift', 'uplift', Number);
+  bind('growth', 'growth', Number);
+  document.getElementById('maintshare').addEventListener('input', e => { S.maintShare = Number(e.target.value) / 100; render(); });
+  document.getElementById('reset').addEventListener('click', () => { applyPreset(S.stage); render(); });
+  document.getElementById('customize-toggle').addEventListener('click', () => {
+    document.getElementById('assumptions').classList.add('hidden');
+    document.getElementById('advanced').classList.remove('hidden');
+  });
+  document.getElementById('collapse').addEventListener('click', () => {
+    document.getElementById('advanced').classList.add('hidden');
+    document.getElementById('assumptions').classList.remove('hidden');
+  });
+}
+
+/* ---------------- init ---------------- */
+applyPreset('midmarket');
+wire();
+render();
+</script>
+</body>
+</html>
