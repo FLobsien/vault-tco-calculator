@@ -226,7 +226,7 @@
   <div class="wrap">
     <div class="label eyebrow">Total cost of ownership · HashiCorp Vault</div>
     <h1>What HashiCorp Vault <span class="mark">actually</span> costs</h1>
-    <p class="sub">The cluster bill is the part you can see. The real spend is the engineers who run it and the months it takes to get to production. This estimates all of it — using <a href="https://infisical.com/blog/hashicorp-vault-pricing" target="_blank" rel="noopener">HashiCorp's published pricing</a> where it exists and clearly-flagged, conservative assumptions where it doesn't.</p>
+    <p class="sub">The cluster bill is the part you can see. The real spend is the engineers who run it and the months it takes to get to production. This estimates all of it — using HashiCorp's published pricing where it exists and clearly-flagged, conservative assumptions where it doesn't.</p>
   </div>
 </header>
 
@@ -368,6 +368,15 @@
 
           <div class="field">
             <div class="slider-row">
+              <span class="label">Add-on modules &amp; premium support</span>
+              <span class="slider-val" id="addon-val"></span>
+            </div>
+            <input type="range" id="addon" min="0" max="60" step="5" />
+            <p class="hint">% on top of license. Namespaces, HSM/FIPS, DR &amp; replication, Sentinel, and KMIP require Vault Enterprise; paid support tiers add more.</p>
+          </div>
+
+          <div class="field">
+            <div class="slider-row">
               <span class="label">Renewal / hidden-cost uplift</span>
               <span class="slider-val" id="uplift-val"></span>
             </div>
@@ -434,8 +443,8 @@
 
 <footer class="foot">
   <div class="wrap">
-    Prototype · figures are estimates for evaluation, not a quote. Sourced pricing from
-    <a href="https://infisical.com/blog/hashicorp-vault-pricing" target="_blank" rel="noopener">HashiCorp Vault Pricing: Complete Guide</a>.
+    Prototype · figures are estimates for evaluation, not a quote. Pricing sourced from
+    <a href="https://www.ibm.com/products/hashicorp/pricing" target="_blank" rel="noopener">IBM's published HashiCorp Vault pricing</a>.
   </div>
 </footer>
 
@@ -461,9 +470,9 @@ const MODEL = {
 
   // --- Stage presets ---
   presets: {
-    startup:    { clients: 25,  clusters: 1, fte: 0.5, onboard: 1.5, clusterSize: 'small',  psFee: 0     },
-    midmarket:  { clients: 150, clusters: 2, fte: 2,   onboard: 3,   clusterSize: 'medium', psFee: 15000 },
-    enterprise: { clients: 800, clusters: 4, fte: 4,   onboard: 6,   clusterSize: 'large',  psFee: 35000 },
+    startup:    { clients: 25,  clusters: 1, fte: 0.5, onboard: 1.5, clusterSize: 'small',  psFee: 0,     addon: 0  },
+    midmarket:  { clients: 150, clusters: 2, fte: 2,   onboard: 3,   clusterSize: 'medium', psFee: 15000, addon: 0  },
+    enterprise: { clients: 800, clusters: 4, fte: 4,   onboard: 6,   clusterSize: 'large',  psFee: 35000, addon: 15 },
   },
 
   // --- Shared defaults ---
@@ -489,6 +498,7 @@ const COLORS = {
   people:    '#dbf530',   // engineers — operations
   maint:     '#9bb524',   // upgrades, patching & DR
   onboard:   '#b3c728',
+  addons:    '#5f6b1e',   // enterprise add-on modules & premium support
   ps:        '#8a8a8a',   // professional services
   uplift:    '#c9c9c9',
 };
@@ -513,6 +523,7 @@ function applyPreset(stage) {
     periodMult: MODEL.periodMultiplier,
     maintShare: MODEL.maintShareDefault,
     psFee: p.psFee,
+    addon: p.addon,
   };
 }
 
@@ -541,10 +552,11 @@ function computeVaultYear(s, yearIndex) {
   const maint = people * s.maintShare;     // portion attributable to upgrades/patching/DR
   const ops = people - maint;              // steady-state operation
   const uplift = license * (s.uplift / 100);
+  const addons = license * (s.addon / 100);   // enterprise modules + premium support, as % of license
   const onboard = yearIndex === 0 ? s.fte * s.salary * (s.onboard / 12) : 0;
   const ps = yearIndex === 0 ? s.psFee : 0;
-  const total = license + infra + people + uplift + onboard + ps;
-  return { clients, fte, license, infra, people, ops, maint, uplift, onboard, ps, total };
+  const total = license + infra + people + addons + uplift + onboard + ps;
+  return { clients, fte, license, infra, people, ops, maint, addons, uplift, onboard, ps, total };
 }
 
 function computeInfisicalYear(s, yearIndex) {
@@ -598,6 +610,7 @@ function render() {
     { key: 'infra',   label: 'Infrastructure', val: y1.infra, src: 'assumed' },
     { key: 'people',  label: 'Engineers — operations', val: y1.ops, src: 'assumed' },
     { key: 'maint',   label: 'Upgrades, patching & DR', val: y1.maint, src: 'assumed' },
+    { key: 'addons',  label: 'Add-on modules &amp; premium support', val: y1.addons, src: 'assumed' },
     { key: 'onboard', label: 'Onboarding (0→1, yr 1)', val: y1.onboard, src: 'assumed' },
     { key: 'ps',      label: 'Professional services (yr 1)', val: y1.ps, src: 'assumed' },
     { key: 'uplift',  label: 'Renewal / hidden uplift', val: y1.uplift, src: 'sourced' },
@@ -662,6 +675,7 @@ function renderAssumptions() {
   rows.push(['Upgrades & maint.', Math.round(S.maintShare * 100) + '% of eng time']);
   rows.push(['Time to production', S.onboard === 0 ? 'instant' : trimNum(S.onboard) + ' mo']);
   if (S.psFee > 0) rows.push(['Pro services (yr 1)', fmt$k(S.psFee)]);
+  if (S.addon > 0) rows.push(['Add-ons & support', '+' + S.addon + '% of license']);
   rows.push(['Renewal uplift', S.uplift + '%']);
   rows.push(['Annual growth', S.growth + '%']);
   document.getElementById('assume-list').innerHTML =
@@ -674,9 +688,10 @@ function trimNum(n){ return Number.isInteger(n) ? n : n.toFixed(2).replace(/0$/,
 function renderNotes() {
   const inf = MODEL.infisical;
   const notes = [
-    { src: true,  html: 'HCP Vault Dedicated cluster pricing and the <strong>$72.92 per-client monthly fee</strong> are taken from <a href="https://infisical.com/blog/hashicorp-vault-pricing" target="_blank" rel="noopener">HashiCorp\'s published pricing</a>. The per-client fee is editable, and negotiated or Enterprise rates often run higher.' },
+    { src: true,  html: 'HCP Vault Dedicated cluster pricing and the <strong>$72.92 per-client monthly fee</strong> are taken from <a href="https://www.ibm.com/products/hashicorp/pricing" target="_blank" rel="noopener">IBM\'s published HashiCorp Vault pricing</a>. The per-client fee is editable, and negotiated or Enterprise rates often run higher.' },
     { src: false, html: 'HCP can count a client for <strong>every active period</strong> rather than once. The client-period multiplier (default 1×) models that amplifier — set it above 1 if usage is intermittent.' },
-    { src: true,  html: 'The <strong>25–60% renewal / hidden-cost uplift</strong> reflects independent procurement data cited in the same pricing breakdown. The default applies the conservative 25% floor; real renewals are frequently higher.' },
+    { src: true,  html: 'The <strong>25–60% renewal / hidden-cost uplift</strong> reflects widely reported procurement data. The default applies the conservative 25% floor; real renewals are frequently higher.' },
+    { src: false, html: '<strong>Add-on modules &amp; premium support</strong> is an editable uplift on the license. Features such as namespaces, HSM/FIPS, performance replication, disaster recovery, Sentinel policies, and KMIP require Vault Enterprise rather than the lower tiers, and paid support tiers cost extra. Adjacent operational tooling (external-secrets / CSI / agent injector and observability) is real cost too, but it is captured here as engineering and maintenance labor rather than double-counted.' },
     { src: false, html: 'Engineering cost is split into <strong>steady-state operations</strong> and <strong>upgrades, patching &amp; DR</strong> — the latter is the most frequently cited ongoing Vault burden. The default attributes 40% of engineering time to it.' },
     { src: false, html: 'Vault Enterprise self-hosted license is <strong>estimated</strong> — HashiCorp publishes no list price. We model a baseline plus a modest per-client uplift as a placeholder. Replace it with your actual quote.' },
     { src: false, html: 'Self-hosted infrastructure is <strong>estimated</strong> per cluster (a high-availability node cluster plus load balancer, storage, and backups).' },
@@ -703,6 +718,7 @@ function syncControls() {
   setRange('maintshare', Math.round(S.maintShare * 100), v => v + '%');
   setRange('onboard', S.onboard, v => v === 0 ? 'instant' : trimNum(v) + ' mo');
   setRange('psfee', S.psFee, v => Number(v) === 0 ? 'none' : fmt$k(v));
+  setRange('addon', S.addon, v => Number(v) === 0 ? 'none' : '+' + v + '%');
   setRange('uplift', S.uplift, v => v + '%');
   setRange('growth', S.growth, v => v + '% / yr');
 }
@@ -732,6 +748,7 @@ function wire() {
   bind('salary', 'salary', Number);
   bind('onboard', 'onboard', Number);
   bind('psfee', 'psFee', Number);
+  bind('addon', 'addon', Number);
   bind('uplift', 'uplift', Number);
   bind('growth', 'growth', Number);
   document.getElementById('maintshare').addEventListener('input', e => { S.maintShare = Number(e.target.value) / 100; render(); });
