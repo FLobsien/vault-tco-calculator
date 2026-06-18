@@ -689,15 +689,15 @@ function renderNotes() {
   const inf = MODEL.infisical;
   const notes = [
     { src: true,  html: 'HCP Vault Dedicated cluster pricing and the <strong>$72.92 per-client monthly fee</strong> are taken from <a href="https://www.ibm.com/products/hashicorp/pricing" target="_blank" rel="noopener">IBM\'s published HashiCorp Vault pricing</a>. The per-client fee is editable, and negotiated or Enterprise rates often run higher.' },
-    { src: false, html: 'HCP can count a client for <strong>every active period</strong> rather than once. The client-period multiplier (default 1×) models that amplifier — set it above 1 if usage is intermittent.' },
-    { src: true,  html: 'The <strong>25–60% renewal / hidden-cost uplift</strong> reflects widely reported procurement data. The default applies the conservative 25% floor; real renewals are frequently higher.' },
-    { src: false, html: '<strong>Add-on modules &amp; premium support</strong> is an editable uplift on the license. Features such as namespaces, HSM/FIPS, performance replication, disaster recovery, Sentinel policies, and KMIP require Vault Enterprise rather than the lower tiers, and paid support tiers cost extra. Adjacent operational tooling (external-secrets / CSI / agent injector and observability) is real cost too, but it is captured here as engineering and maintenance labor rather than double-counted.' },
+    { src: true,  html: 'HCP counts a <a href="https://developer.hashicorp.com/vault/docs/concepts/billing/clients/counting" target="_blank" rel="noopener">billable client</a> per active billing period, not once for its lifetime. The client-period multiplier (default 1×) models that amplifier — raise it if clients churn across periods.' },
+    { src: false, html: 'The <strong>25–60% renewal / hidden-cost uplift</strong> reflects widely reported procurement data. The default applies the conservative 25% floor; real renewals are frequently higher.' },
+    { src: true,  html: '<strong>Add-on modules &amp; premium support</strong> is an editable uplift on the license. <a href="https://developer.hashicorp.com/vault/docs/enterprise/namespaces" target="_blank" rel="noopener">Namespaces</a>, <a href="https://developer.hashicorp.com/vault/docs/enterprise/hsm" target="_blank" rel="noopener">HSM/FIPS</a>, <a href="https://developer.hashicorp.com/vault/docs/enterprise/replication" target="_blank" rel="noopener">performance &amp; disaster-recovery replication</a>, and <a href="https://developer.hashicorp.com/vault/docs/enterprise/sentinel/properties" target="_blank" rel="noopener">Sentinel policies</a> require <a href="https://developer.hashicorp.com/vault/tutorials/get-started/available-editions" target="_blank" rel="noopener">Vault Enterprise</a> rather than the lower tiers, and paid support tiers cost extra. Adjacent operational tooling (external-secrets / CSI / agent injector and observability) is real cost too, but it is captured here as engineering and maintenance labor rather than double-counted.' },
     { src: false, html: 'Engineering cost is split into <strong>steady-state operations</strong> and <strong>upgrades, patching &amp; DR</strong> — the latter is the most frequently cited ongoing Vault burden. The default attributes 40% of engineering time to it.' },
-    { src: false, html: 'Vault Enterprise self-hosted license is <strong>estimated</strong> — HashiCorp publishes no list price. We model a baseline plus a modest per-client uplift as a placeholder. Replace it with your actual quote.' },
+    { src: false, html: 'Vault Enterprise self-hosted license is <strong>estimated</strong> — HashiCorp publishes no list price for the <a href="https://developer.hashicorp.com/vault/tutorials/get-started/available-editions" target="_blank" rel="noopener">self-managed editions</a>. We model a baseline plus a modest per-client uplift as a placeholder. Replace it with your actual quote.' },
     { src: false, html: 'Self-hosted infrastructure is <strong>estimated</strong> per cluster (a high-availability node cluster plus load balancer, storage, and backups).' },
     { src: false, html: 'Fully-loaded engineer cost is an <strong>estimate</strong> (base plus benefits and overhead). FTE counts are deliberately conservative for each profile.' },
     { src: false, html: 'Onboarding (0→1) and any <strong>professional-services / onboarding fee</strong> are charged once, in year 1. Larger, multi-environment deployments commonly take several months to reach production and often carry an implementation fee.' },
-    { src: false, html: 'The Infisical comparison uses the published <strong>Pro per-identity rate</strong> (blended lower at volume), a <strong>fraction of the Vault operating headcount</strong>, and onboarding in days rather than months. These are deliberately conservative; enterprise pricing is custom.' },
+    { src: false, html: 'The Infisical comparison uses the published <a href="https://infisical.com/pricing" target="_blank" rel="noopener">Pro per-identity rate</a> (blended lower at volume), a <strong>fraction of the Vault operating headcount</strong>, and onboarding in days rather than months. These are deliberately conservative; enterprise pricing is custom.' },
   ];
   document.getElementById('notes-list').innerHTML = notes.map(n =>
     '<li class="' + (n.src ? 'sourced' : '') + '">' + n.html + '</li>').join('');
@@ -767,6 +767,18 @@ function wire() {
 applyPreset('midmarket');
 wire();
 render();
+
+// Safety net: every external link opens in a new tab. Notes re-render on each
+// interaction, so re-apply after renders too.
+function externalizeLinks() {
+  document.querySelectorAll('a[href^="http"]').forEach(a => {
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+  });
+}
+externalizeLinks();
+const _origRender = render;
+render = function () { _origRender(); externalizeLinks(); };
 </script>
 </body>
 </html>
