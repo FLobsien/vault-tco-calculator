@@ -186,7 +186,7 @@
   .legend-item .li-val { font-family: var(--mono); font-size: 13px; margin-left: auto; padding-left: 12px; }
   .legend-item .li-pct { font-family: var(--mono); font-size: 11px; color: var(--text-subtle); }
   .src-tag { font-family: var(--mono); font-size: 10px; letter-spacing: .03em; padding: 1px 4px; border: 1px solid var(--border); color: var(--text-subtle); }
-  .src-tag.assumed { border-style: dashed; }
+  .src-tag.estimated { border-style: dashed; }
 
   /* info "i" + tooltip (adapted from design system .tip) */
   .tip { position: relative; display: inline-flex; align-items: center; }
@@ -476,7 +476,7 @@
 
         <div class="notes" id="notes">
           <h3>How these numbers are built</h3>
-          <p class="panel-note" style="margin-bottom:18px;">Solid markers are taken from published pricing. Dashed markers are assumptions — adjust the inputs to match your reality.</p>
+          <p class="panel-note" style="margin-bottom:18px;">Solid markers are taken from published pricing. Dashed markers are estimated — adjust the inputs to match your reality.</p>
           <ol id="notes-list"></ol>
         </div>
 
@@ -633,13 +633,13 @@ function render() {
 
   // breakdown
   const segs = [
-    { key: 'license', label: S.deploy === 'community' ? 'License (free)' : 'License / subscription', val: y1.license, src: S.deploy === 'hcp' ? 'sourced' : 'assumed' },
-    { key: 'infra',   label: 'Infrastructure', val: y1.infra, src: 'assumed' },
-    { key: 'people',  label: 'Engineers — operations', val: y1.ops, src: 'assumed' },
-    { key: 'maint',   label: 'Upgrades, patching & DR', val: y1.maint, src: 'assumed' },
-    { key: 'addons',  label: 'Add-on modules &amp; premium support', val: y1.addons, src: 'assumed' },
-    { key: 'onboard', label: 'Onboarding (0→1, yr 1)', val: y1.onboard, src: 'assumed' },
-    { key: 'ps',      label: 'Professional services (yr 1)', val: y1.ps, src: 'assumed' },
+    { key: 'license', label: S.deploy === 'community' ? 'License (free)' : 'License / subscription', val: y1.license, src: S.deploy === 'hcp' ? 'sourced' : 'estimated' },
+    { key: 'infra',   label: 'Infrastructure', val: y1.infra, src: 'estimated' },
+    { key: 'people',  label: 'Engineers — operations', val: y1.ops, src: 'estimated' },
+    { key: 'maint',   label: 'Upgrades, patching & DR', val: y1.maint, src: 'estimated' },
+    { key: 'addons',  label: 'Add-on modules &amp; premium support', val: y1.addons, src: 'estimated' },
+    { key: 'onboard', label: 'Onboarding (0→1, yr 1)', val: y1.onboard, src: 'estimated' },
+    { key: 'ps',      label: 'Professional services (yr 1)', val: y1.ps, src: 'estimated' },
     { key: 'uplift',  label: 'Renewal / hidden uplift', val: y1.uplift, src: 'sourced' },
   ].filter(s => s.val > 0);
 
@@ -660,7 +660,7 @@ function render() {
     li.className = 'legend-item';
     li.innerHTML =
       '<span class="swatch" style="background:' + COLORS[s.key] + '"></span>' +
-      '<span class="li-label">' + s.label + ' <span class="src-tag ' + (s.src === 'assumed' ? 'assumed' : '') + '">' + s.src + '</span>' + tip + '</span>' +
+      '<span class="li-label">' + s.label + ' <span class="src-tag ' + (s.src === 'estimated' ? 'estimated' : '') + '">' + s.src + '</span>' + tip + '</span>' +
       '<span class="li-val">' + fmt$(s.val) + ' <span class="li-pct">' + pct.toFixed(0) + '%</span></span>';
     legend.appendChild(li);
   });
