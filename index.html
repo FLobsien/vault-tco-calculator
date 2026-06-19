@@ -17,7 +17,10 @@
     --text-subtle: #737373;
     --text-on-dark: #e4e4e7;
     --text-on-dark-subtle: #a1a1aa;
-    --volt: #dbf530;
+    --volt: #F7FE62;
+    --tint: #c3c3c3;
+    --accent-green: #56a600;
+    --accent-deep-green: #23776a;
     --border: #dcdcdc;
     --border-dark: #2a2a2a;
     --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
@@ -163,15 +166,11 @@
   .result-top {
     background: var(--bg-dark); color: var(--text-on-dark);
     border: 1px solid var(--border-dark); padding: 36px;
-    display: grid; grid-template-columns: 1fr 1fr; gap: 28px;
   }
-  @media (max-width: 620px) { .result-top { grid-template-columns: 1fr; } }
   .bignum { font-family: var(--mono); font-weight: 600; line-height: 1; }
   .result-top .label { color: var(--text-on-dark-subtle); margin-bottom: 12px; }
   .vault-num { font-size: clamp(34px, 5vw, 52px); }
   .vault-num .yr { font-size: 16px; color: var(--text-on-dark-subtle); }
-  .delta-box { border-left: 1px solid var(--border-dark); padding-left: 28px; }
-  @media (max-width: 620px) { .delta-box { border-left: none; padding-left: 0; border-top: 1px solid var(--border-dark); padding-top: 24px; } }
   .delta-num { font-size: clamp(28px, 4vw, 40px); }
   .delta-num .mk { background: var(--volt); color: #000; padding: 0 6px; }
   .delta-sub { color: var(--text-on-dark-subtle); font-size: 13px; margin-top: 10px; max-width: 34ch; }
@@ -189,6 +188,31 @@
   .src-tag { font-family: var(--mono); font-size: 10px; letter-spacing: .03em; padding: 1px 4px; border: 1px solid var(--border); color: var(--text-subtle); }
   .src-tag.assumed { border-style: dashed; }
 
+  /* info "i" + tooltip (adapted from design system .tip) */
+  .tip { position: relative; display: inline-flex; align-items: center; }
+  .info {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 15px; height: 15px; margin-left: 6px;
+    border: 1px solid var(--border); border-radius: 0;
+    font-family: var(--mono); font-size: 10px; line-height: 1;
+    color: var(--text-subtle); cursor: help; user-select: none;
+    transition: color var(--dur-fast, 160ms) var(--ease), border-color var(--dur-fast, 160ms) var(--ease);
+  }
+  .tip:hover .info, .tip:focus-within .info { color: #000; border-color: #000; }
+  .tip__bubble {
+    position: absolute; top: calc(100% + 8px); left: 0;
+    transform: translateY(-4px);
+    width: 260px; max-width: 70vw;
+    background: #000; color: var(--text-on-dark);
+    padding: 12px 14px; border: 1px solid var(--border-dark);
+    font-family: var(--font); font-size: 12px; line-height: 1.5; letter-spacing: 0;
+    text-align: left; pointer-events: none; opacity: 0; z-index: 20;
+    transition: opacity 160ms var(--ease), transform 160ms var(--ease);
+  }
+  .tip__bubble b { color: #fff; font-weight: 600; }
+  .tip__bubble a { color: var(--volt); text-decoration: none; pointer-events: auto; border-bottom: 1px solid var(--border-dark); }
+  .tip:hover .tip__bubble, .tip:focus-within .tip__bubble { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
   /* 3-year table */
   table.years { width: 100%; border-collapse: collapse; margin-top: 8px; }
   table.years th, table.years td { text-align: right; padding: 10px 12px; font-family: var(--mono); font-size: 13px; border-bottom: 1px solid var(--border); }
@@ -200,6 +224,25 @@
     border-left: 2px solid var(--volt); padding: 4px 0 4px 18px; margin-top: 24px;
     font-size: 15px; color: var(--text);
   }
+
+  /* Infisical confession card */
+  .confess {
+    background: var(--bg-dark); color: var(--text-on-dark);
+    border: 1px solid var(--border-dark); padding: 36px;
+  }
+  .confess > .label { color: var(--text-on-dark-subtle); display: block; margin-bottom: 14px; }
+  .confess h2 {
+    font-weight: 500; font-size: clamp(24px, 3.5vw, 36px); line-height: 1.1;
+    letter-spacing: -0.03em; max-width: 22ch; margin-bottom: 18px;
+  }
+  .confess p { font-size: 16px; color: var(--text-on-dark); max-width: 64ch; margin-bottom: 14px; }
+  .confess .cta {
+    display: inline-block; margin-top: 12px;
+    background: var(--volt); color: #000; border: 1px solid var(--volt);
+    padding: 10px 18px; font-size: 14px; text-decoration: none;
+    transition: background var(--dur-fast, 160ms) var(--ease), color var(--dur-fast, 160ms) var(--ease);
+  }
+  .confess .cta:hover { background: transparent; color: var(--volt); }
 
   /* footnotes */
   .notes { margin-top: 40px; border-top: 1px solid var(--border); padding-top: 28px; }
@@ -404,16 +447,9 @@
       <section aria-label="Results" class="stack" style="gap:24px;">
 
         <div class="result-top">
-          <div>
-            <div class="label">Estimated annual TCO · year 1</div>
-            <div class="bignum vault-num" id="vault-total">—</div>
-            <div class="delta-sub" id="vault-mode-line"></div>
-          </div>
-          <div class="delta-box">
-            <div class="label">Versus Infisical</div>
-            <div class="bignum delta-num"><span class="mk" id="delta-amount">—</span></div>
-            <div class="delta-sub" id="delta-line"></div>
-          </div>
+          <div class="label">Estimated annual TCO · year 1</div>
+          <div class="bignum vault-num" id="vault-total">—</div>
+          <div class="delta-sub" id="vault-mode-line"></div>
         </div>
 
         <div class="panel">
@@ -428,6 +464,14 @@
           <h2>Three-year projection</h2>
           <p class="panel-note">With growth compounding clients and team. Onboarding hits year 1 only.</p>
           <table class="years" id="years-table"></table>
+        </div>
+
+        <div class="confess">
+          <div class="label">A confession</div>
+          <h2>We make a secrets manager too.</h2>
+          <p>We built this to be fair: every figure leans on HashiCorp's own published pricing, every assumption is conservative and labelled, and you can change all of them. But full disclosure — we're Infisical, we make an open-source secrets platform, and to the surprise of absolutely no one, we think you should look at it too.</p>
+          <p>Many of the teams who run these numbers are evaluating Vault and Infisical side by side. A lot of them choose us — for the open-source core, the Postgres-based architecture (no Raft to certify), and setup measured in hours rather than the months above. We'll let you judge the cost side yourself.</p>
+          <a class="cta" href="https://infisical.com" target="_blank" rel="noopener">See what Infisical does →</a>
         </div>
 
         <div class="notes" id="notes">
@@ -481,26 +525,29 @@ const MODEL = {
   growthDefault: 20,
   periodMultiplier: 1,              // HCP can count clients per active period; 1 = unique
   maintShareDefault: 0.4,           // share of eng time consumed by upgrades/patching/DR
-
-  // --- Infisical comparison side (assumed, conservative) ---
-  infisical: {
-    perIdentityMonth: 18,           // Pro plan, published
-    fteFraction: 0.2,               // Vault ops effort that remains with Infisical
-    onboardMonths: 0.1,             // ~ days, not months
-    enterpriseDiscountAtClients: 250, // above this, assume volume pricing kicks in
-    enterpriseEffectivePerIdentity: 9, // blended effective rate at volume
-  },
 };
 
 const COLORS = {
   license:   '#111111',
   infra:     '#737373',
-  people:    '#dbf530',   // engineers — operations
-  maint:     '#9bb524',   // upgrades, patching & DR
-  onboard:   '#b3c728',
-  addons:    '#5f6b1e',   // enterprise add-on modules & premium support
+  people:    '#F7FE62',   // engineers — operations (volt)
+  maint:     '#56a600',   // upgrades, patching & DR
+  addons:    '#23776a',   // enterprise add-on modules & premium support
+  onboard:   '#c9d63f',   // onboarding (0→1)
   ps:        '#8a8a8a',   // professional services
-  uplift:    '#c9c9c9',
+  uplift:    '#c3c3c3',   // renewal / hidden uplift
+};
+
+// Defensible, Vault-specific explanations for each cost driver.
+const TOOLTIPS = {
+  license:  'HCP Vault Dedicated bills a fixed cluster fee plus a fee for <b>every client</b> that authenticates. Per HashiCorp\'s docs a client is counted once per active billing period, so machine and intermittent identities still add up. <a href="https://developer.hashicorp.com/vault/docs/concepts/billing/clients/counting" target="_blank" rel="noopener">How clients are counted →</a>',
+  infra:    'Self-managed Vault runs as a <b>highly available cluster</b> (3+ nodes on integrated Raft storage) plus load balancer, storage and backups — all billed on your own cloud account, separate from any license.',
+  people:   'Vault is an unopinionated toolkit, not a finished product. Auth methods, policies, secret engines and access reviews are configured and run by hand — work that usually needs a dedicated platform or SRE owner.',
+  maint:    'Vault upgrades follow a strict version path, and its <b>Raft</b> storage means rolling upgrades and disaster-recovery drills must be planned and tested. This day-2 load is the cost teams most often underestimate.',
+  addons:   '<b>Namespaces, HSM/FIPS, performance &amp; DR replication, Sentinel and KMIP are Enterprise-only.</b> Needing any one of them moves you off the cheaper tiers onto Enterprise licensing. <a href="https://developer.hashicorp.com/vault/tutorials/get-started/available-editions" target="_blank" rel="noopener">Vault editions →</a>',
+  onboard:  'Standing Vault up for production — HA topology, storage, unseal, auth methods, policies and integrations — commonly takes weeks to months of engineering before the first secret is served.',
+  ps:       'Enterprise Vault agreements frequently include onboarding or implementation fees, or paid professional services, charged once up front.',
+  uplift:   'Per-client and feature-based pricing means the bill grows as identities and requirements do. Widely reported procurement data puts renewal increases at <b>25–60% or more</b>.',
 };
 
 /* ---------------- state ---------------- */
@@ -559,17 +606,6 @@ function computeVaultYear(s, yearIndex) {
   return { clients, fte, license, infra, people, ops, maint, addons, uplift, onboard, ps, total };
 }
 
-function computeInfisicalYear(s, yearIndex) {
-  const g = Math.pow(1 + s.growth / 100, yearIndex);
-  const clients = Math.round(s.clients * g);
-  const inf = MODEL.infisical;
-  const rate = clients > inf.enterpriseDiscountAtClients ? inf.enterpriseEffectivePerIdentity : inf.perIdentityMonth;
-  const license = clients * rate * 12;
-  const people = s.fte * inf.fteFraction * s.salary;
-  const onboard = yearIndex === 0 ? s.fte * inf.fteFraction * s.salary * (inf.onboardMonths / 12) : 0;
-  return { license, people, onboard, total: license + people + onboard };
-}
-
 /* ---------------- format ---------------- */
 const fmt$ = n => '$' + Math.round(n).toLocaleString('en-US');
 const fmt$k = n => n >= 1000 ? '$' + (Math.round(n / 100) / 10).toLocaleString('en-US') + 'k' : '$' + Math.round(n);
@@ -589,20 +625,11 @@ function render() {
   document.getElementById('clusters-label').textContent = S.deploy === 'hcp' ? 'Clusters' : 'Clusters / environments';
 
   const y1 = computeVaultYear(S, 0);
-  const inf1 = computeInfisicalYear(S, 0);
 
   // top numbers
   document.getElementById('vault-total').innerHTML = fmt$(y1.total) + ' <span class="yr">/ yr</span>';
   const modeName = { hcp: 'HCP Vault Dedicated · ' + cap(S.tier), enterprise: 'Vault Enterprise · self-hosted', community: 'Vault Community · self-hosted' }[S.deploy];
   document.getElementById('vault-mode-line').textContent = modeName + ' · ' + y1.clients.toLocaleString() + ' clients · ' + trimNum(S.fte) + ' FTE';
-
-  const delta = y1.total - inf1.total;
-  const mult = inf1.total > 0 ? y1.total / inf1.total : 0;
-  document.getElementById('delta-amount').textContent = fmt$(Math.abs(delta)) + (delta >= 0 ? ' less' : ' more') + ' / yr';
-  document.getElementById('delta-line').textContent =
-    'Infisical estimated at ' + fmt$(inf1.total) + '/yr for the same scale — about ' +
-    (mult >= 1 ? mult.toFixed(1) + '× lower' : (1/mult).toFixed(1) + '× higher') +
-    '. Mostly fewer engineers and days-not-months to value.';
 
   // breakdown
   const segs = [
@@ -626,11 +653,14 @@ function render() {
     d.title = s.label + ' · ' + fmt$(s.val);
     bar.appendChild(d);
 
+    const tip = TOOLTIPS[s.key]
+      ? '<span class="tip" tabindex="0"><span class="info">i</span><span class="tip__bubble">' + TOOLTIPS[s.key] + '</span></span>'
+      : '';
     const li = document.createElement('div');
     li.className = 'legend-item';
     li.innerHTML =
       '<span class="swatch" style="background:' + COLORS[s.key] + '"></span>' +
-      '<span class="li-label">' + s.label + ' <span class="src-tag ' + (s.src === 'assumed' ? 'assumed' : '') + '">' + s.src + '</span></span>' +
+      '<span class="li-label">' + s.label + ' <span class="src-tag ' + (s.src === 'assumed' ? 'assumed' : '') + '">' + s.src + '</span>' + tip + '</span>' +
       '<span class="li-val">' + fmt$(s.val) + ' <span class="li-pct">' + pct.toFixed(0) + '%</span></span>';
     legend.appendChild(li);
   });
@@ -645,17 +675,15 @@ function render() {
 
   // 3-year table
   const tbl = document.getElementById('years-table');
-  let grand = 0, grandInf = 0;
-  let rows = '<tr><th>Year</th><th>Clients</th><th>Vault TCO</th><th>Infisical</th><th>You save</th></tr>';
+  let grand = 0;
+  let rows = '<tr><th>Year</th><th>Clients</th><th>FTE</th><th>Annual TCO</th></tr>';
   for (let i = 0; i < 3; i++) {
     const v = computeVaultYear(S, i);
-    const f = computeInfisicalYear(S, i);
-    grand += v.total; grandInf += f.total;
+    grand += v.total;
     rows += '<tr><td>Year ' + (i + 1) + '</td><td>' + v.clients.toLocaleString() + '</td><td>' +
-      fmt$(v.total) + '</td><td>' + fmt$(f.total) + '</td><td>' + fmt$(v.total - f.total) + '</td></tr>';
+      trimNum(Math.round(v.fte * 100) / 100) + '</td><td>' + fmt$(v.total) + '</td></tr>';
   }
-  rows += '<tr class="total"><td>3-year total</td><td></td><td>' + fmt$(grand) + '</td><td>' +
-    fmt$(grandInf) + '</td><td>' + fmt$(grand - grandInf) + '</td></tr>';
+  rows += '<tr class="total"><td>3-year total</td><td></td><td></td><td>' + fmt$(grand) + '</td></tr>';
   tbl.innerHTML = rows;
 
   renderAssumptions();
@@ -686,7 +714,6 @@ function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
 function trimNum(n){ return Number.isInteger(n) ? n : n.toFixed(2).replace(/0$/,''); }
 
 function renderNotes() {
-  const inf = MODEL.infisical;
   const notes = [
     { src: true,  html: 'HCP Vault Dedicated cluster pricing and the <strong>$72.92 per-client monthly fee</strong> are taken from <a href="https://www.ibm.com/products/hashicorp/pricing" target="_blank" rel="noopener">IBM\'s published HashiCorp Vault pricing</a>. The per-client fee is editable, and negotiated or Enterprise rates often run higher.' },
     { src: true,  html: 'HCP counts a <a href="https://developer.hashicorp.com/vault/docs/concepts/billing/clients/counting" target="_blank" rel="noopener">billable client</a> per active billing period, not once for its lifetime. The client-period multiplier (default 1×) models that amplifier — raise it if clients churn across periods.' },
@@ -697,7 +724,6 @@ function renderNotes() {
     { src: false, html: 'Self-hosted infrastructure is <strong>estimated</strong> per cluster (a high-availability node cluster plus load balancer, storage, and backups).' },
     { src: false, html: 'Fully-loaded engineer cost is an <strong>estimate</strong> (base plus benefits and overhead). FTE counts are deliberately conservative for each profile.' },
     { src: false, html: 'Onboarding (0→1) and any <strong>professional-services / onboarding fee</strong> are charged once, in year 1. Larger, multi-environment deployments commonly take several months to reach production and often carry an implementation fee.' },
-    { src: false, html: 'The Infisical comparison uses the published <a href="https://infisical.com/pricing" target="_blank" rel="noopener">Pro per-identity rate</a> (blended lower at volume), a <strong>fraction of the Vault operating headcount</strong>, and onboarding in days rather than months. These are deliberately conservative; enterprise pricing is custom.' },
   ];
   document.getElementById('notes-list').innerHTML = notes.map(n =>
     '<li class="' + (n.src ? 'sourced' : '') + '">' + n.html + '</li>').join('');
