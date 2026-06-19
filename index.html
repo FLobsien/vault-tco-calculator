@@ -163,6 +163,23 @@
   .assumptions li b { font-family: var(--mono); font-weight: 600; text-align: right; }
   .assumptions .reset { width: 100%; margin-top: 16px; }
 
+  /* customize categories */
+  .cat { border: 1px solid var(--border); margin-bottom: 16px; }
+  .cat-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; }
+  .cat-head .label { margin: 0; }
+  .cat-body { padding: 4px 16px 6px; }
+  .cat--off { opacity: 0.6; }
+  .cat--off .cat-body { display: none; }
+  .cat-toggle { position: relative; width: 42px; height: 22px; flex: none; border: 1px solid var(--border); background: transparent; border-radius: 0; cursor: pointer; padding: 0; transition: background .15s var(--ease), border-color .15s var(--ease); }
+  .cat-toggle::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #000; transition: left .15s var(--ease); }
+  .cat-toggle[aria-pressed="true"] { background: var(--volt); border-color: var(--volt); }
+  .cat-toggle[aria-pressed="true"]::after { left: 22px; }
+  .cat-toggle:focus-visible { outline: 1px solid #000; outline-offset: 2px; }
+  .mini-check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-subtle); cursor: pointer; margin-bottom: 8px; }
+  .mini-check input { width: 15px; height: 15px; accent-color: #000; cursor: pointer; }
+  .num-input { width: 150px; background: transparent; border: 1px solid var(--border); border-radius: 0; padding: 8px 10px; font-family: var(--mono); font-size: 14px; color: #000; margin-bottom: 8px; }
+  .num-input:focus-visible { border-color: #000; outline: none; }
+
   /* ---------- Results ---------- */
   .result-top {
     background: var(--bg-dark); color: var(--text-on-dark);
@@ -313,129 +330,159 @@
 
         <!-- advanced editable controls, hidden until "Customize" -->
         <div id="advanced" class="hidden">
-          <div class="field hcp-only">
-            <span class="label">HCP tier</span>
-            <div class="seg" id="seg-tier" role="group" aria-label="HCP tier">
-              <button data-tier="essentials" aria-pressed="false">Essentials</button>
-              <button data-tier="standard" aria-pressed="true">Standard</button>
+          <p class="panel-note" style="margin:0 0 16px;">Toggle whole categories on or off to isolate what you want to count.</p>
+
+          <!-- ===== Vault subscription ===== -->
+          <div class="cat" data-cat="subscription">
+            <div class="cat-head">
+              <span class="label">Vault subscription</span>
+              <button type="button" class="cat-toggle" data-cat="subscription" aria-pressed="true" aria-label="Toggle Vault subscription costs"></button>
+            </div>
+            <div class="cat-body">
+              <div class="field hcp-only">
+                <span class="label">HCP tier</span>
+                <div class="seg" id="seg-tier" role="group" aria-label="HCP tier">
+                  <button data-tier="essentials" aria-pressed="false">Essentials</button>
+                  <button data-tier="standard" aria-pressed="true">Standard</button>
+                </div>
+              </div>
+
+              <div class="field hcp-only">
+                <span class="label">Cluster size</span>
+                <select id="cluster-size">
+                  <option value="small">Small</option>
+                  <option value="medium">Medium</option>
+                  <option value="large">Large</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <div class="slider-row">
+                  <span class="label">Clients (apps, services, users)</span>
+                  <span class="slider-val" id="clients-val"></span>
+                </div>
+                <input type="range" id="clients" min="5" max="3000" step="5" />
+                <p class="hint">Anything that authenticates to Vault. Typical: ~25 (startup) · ~150 (mid-market) · 800+ (enterprise).</p>
+              </div>
+
+              <div class="field hcp-only">
+                <div class="slider-row">
+                  <span class="label">Per-client fee / mo</span>
+                  <span class="slider-val" id="perclient-val"></span>
+                </div>
+                <label class="mini-check"><input type="checkbox" id="custom-quote" /> <span>Custom quote / contract?</span></label>
+                <input type="number" id="perclient-input" class="num-input hidden" min="0" step="0.01" aria-label="Custom per-client monthly rate" />
+                <p class="hint">HCP list price is <strong>$72.92</strong> per client / month. Toggle on to enter a negotiated or Enterprise rate (often higher).</p>
+              </div>
+
+              <div class="field hcp-only">
+                <div class="slider-row">
+                  <span class="label">Client-period multiplier</span>
+                  <span class="slider-val" id="periodmult-val"></span>
+                </div>
+                <input type="range" id="periodmult" min="1" max="12" step="1" />
+                <p class="hint">HCP can count a client for every active period, not once. 1× = unique clients; raise it if identities churn across periods.</p>
+              </div>
+
+              <div class="field">
+                <div class="slider-row">
+                  <span class="label" id="clusters-label">Clusters / environments</span>
+                  <span class="slider-val" id="clusters-val"></span>
+                </div>
+                <input type="range" id="clusters" min="1" max="12" step="1" />
+                <p class="hint">Prod, non-prod, and per-region replicas each multiply cost. Typical: 1 (startup) · 2–3 (mid) · 4+ (enterprise / multi-region).</p>
+              </div>
+
+              <div class="field">
+                <div class="slider-row">
+                  <span class="label">Add-on modules &amp; premium support</span>
+                  <span class="slider-val" id="addon-val"></span>
+                </div>
+                <input type="range" id="addon" min="0" max="60" step="5" />
+                <p class="hint">% on top of license. Namespaces, HSM/FIPS, DR &amp; replication, Sentinel, and KMIP require Vault Enterprise; paid support tiers add more.</p>
+              </div>
             </div>
           </div>
 
-          <div class="field hcp-only">
-            <span class="label">Cluster size</span>
-            <select id="cluster-size">
-              <option value="small">Small</option>
-              <option value="medium">Medium</option>
-              <option value="large">Large</option>
-            </select>
+          <!-- ===== Operational overhead ===== -->
+          <div class="cat" data-cat="operational">
+            <div class="cat-head">
+              <span class="label">Operational overhead</span>
+              <button type="button" class="cat-toggle" data-cat="operational" aria-pressed="true" aria-label="Toggle operational overhead"></button>
+            </div>
+            <div class="cat-body">
+              <div class="field">
+                <div class="slider-row">
+                  <span class="label">Engineers dedicated to Vault (FTE)</span>
+                  <span class="slider-val" id="fte-val"></span>
+                </div>
+                <input type="range" id="fte" min="0" max="12" step="0.25" />
+                <p class="hint">Running and maintaining Vault. Typical: 0.5 (lean) · 1–2 (mid-market) · 3–5+ (enterprise platform team).</p>
+              </div>
+
+              <div class="field">
+                <div class="slider-row">
+                  <span class="label">Fully-loaded engineer cost / yr</span>
+                  <span class="slider-val" id="salary-val"></span>
+                </div>
+                <input type="range" id="salary" min="120000" max="350000" step="5000" />
+                <p class="hint">Base + benefits + overhead. US platform/security engineers commonly land $180k–$260k loaded.</p>
+              </div>
+
+              <div class="field">
+                <div class="slider-row">
+                  <span class="label">Effort spent on upgrades &amp; maintenance</span>
+                  <span class="slider-val" id="maintshare-val"></span>
+                </div>
+                <input type="range" id="maintshare" min="0" max="80" step="5" />
+                <p class="hint">Share of engineering time on upgrades, patching, and DR — the most-cited Vault burden. Typical: 30–50% for self-managed.</p>
+              </div>
+
+              <div class="field">
+                <div class="slider-row">
+                  <span class="label">Time to production (0→1)</span>
+                  <span class="slider-val" id="onboard-val"></span>
+                </div>
+                <input type="range" id="onboard" min="0" max="12" step="0.5" />
+                <p class="hint">One-time ramp, charged in year 1. Typical: weeks for a single cluster · 3–6 months for multi-region / HA.</p>
+              </div>
+
+              <div class="field">
+                <div class="slider-row">
+                  <span class="label">Professional services / onboarding fee</span>
+                  <span class="slider-val" id="psfee-val"></span>
+                </div>
+                <input type="range" id="psfee" min="0" max="100000" step="5000" />
+                <p class="hint">One-time, charged in year 1. Vendors commonly attach these to enterprise deployments.</p>
+              </div>
+            </div>
           </div>
 
-          <div class="field hcp-only">
-            <div class="slider-row">
-              <span class="label">Per-client fee / mo</span>
-              <span class="slider-val" id="perclient-val"></span>
+          <!-- ===== Growth & renewal ===== -->
+          <div class="cat" data-cat="growth">
+            <div class="cat-head">
+              <span class="label">Growth &amp; renewal</span>
+              <button type="button" class="cat-toggle" data-cat="growth" aria-pressed="true" aria-label="Toggle growth and renewal"></button>
             </div>
-            <input type="range" id="perclient" min="0" max="200" step="1" />
-            <p class="hint">HCP list is $72.92. Negotiated and Enterprise per-client rates vary — often higher.</p>
-          </div>
+            <div class="cat-body">
+              <div class="field">
+                <div class="slider-row">
+                  <span class="label">Annual growth (clients &amp; team)</span>
+                  <span class="slider-val" id="growth-val"></span>
+                </div>
+                <input type="range" id="growth" min="0" max="60" step="5" />
+                <p class="hint">Compounds clients and team across the 3-year view. Typical: 15–30% / yr for a scaling team.</p>
+              </div>
 
-          <div class="field hcp-only">
-            <div class="slider-row">
-              <span class="label">Client-period multiplier</span>
-              <span class="slider-val" id="periodmult-val"></span>
+              <div class="field">
+                <div class="slider-row">
+                  <span class="label">Renewal / hidden-cost uplift</span>
+                  <span class="slider-val" id="uplift-val"></span>
+                </div>
+                <input type="range" id="uplift" min="0" max="120" step="5" />
+                <p class="hint">Procurement data shows 25–60% at renewal — and real cases run higher. Default is the floor.</p>
+              </div>
             </div>
-            <input type="range" id="periodmult" min="1" max="12" step="1" />
-            <p class="hint">HCP can count a client for every active period, not once. 1× = unique clients.</p>
-          </div>
-
-          <div class="field">
-            <div class="slider-row">
-              <span class="label">Clients (apps, services, users)</span>
-              <span class="slider-val" id="clients-val"></span>
-            </div>
-            <input type="range" id="clients" min="5" max="3000" step="5" />
-            <p class="hint">Anything that authenticates to Vault. Drives the per-client fee.</p>
-          </div>
-
-          <div class="field">
-            <div class="slider-row">
-              <span class="label" id="clusters-label">Clusters / environments</span>
-              <span class="slider-val" id="clusters-val"></span>
-            </div>
-            <input type="range" id="clusters" min="1" max="12" step="1" />
-            <p class="hint">Prod, non-prod, and per-region replicas each multiply infrastructure.</p>
-          </div>
-
-          <div class="field">
-            <div class="slider-row">
-              <span class="label">Engineers dedicated to Vault (FTE)</span>
-              <span class="slider-val" id="fte-val"></span>
-            </div>
-            <input type="range" id="fte" min="0" max="12" step="0.25" />
-            <p class="hint">Running and maintaining Vault. Fractional is fine.</p>
-          </div>
-
-          <div class="field">
-            <div class="slider-row">
-              <span class="label">Fully-loaded engineer cost / yr</span>
-              <span class="slider-val" id="salary-val"></span>
-            </div>
-            <input type="range" id="salary" min="120000" max="350000" step="5000" />
-            <p class="hint">Base + benefits + overhead.</p>
-          </div>
-
-          <div class="field">
-            <div class="slider-row">
-              <span class="label">Effort spent on upgrades &amp; maintenance</span>
-              <span class="slider-val" id="maintshare-val"></span>
-            </div>
-            <input type="range" id="maintshare" min="0" max="80" step="5" />
-            <p class="hint">Share of the engineering time consumed by upgrades, patching, and DR — the most-cited Vault burden.</p>
-          </div>
-
-          <div class="field">
-            <div class="slider-row">
-              <span class="label">Time to production (0→1)</span>
-              <span class="slider-val" id="onboard-val"></span>
-            </div>
-            <input type="range" id="onboard" min="0" max="12" step="0.5" />
-            <p class="hint">One-time ramp, charged in year 1.</p>
-          </div>
-
-          <div class="field">
-            <div class="slider-row">
-              <span class="label">Professional services / onboarding fee</span>
-              <span class="slider-val" id="psfee-val"></span>
-            </div>
-            <input type="range" id="psfee" min="0" max="100000" step="5000" />
-            <p class="hint">One-time, charged in year 1. Vendors commonly attach these to enterprise deployments.</p>
-          </div>
-
-          <div class="field">
-            <div class="slider-row">
-              <span class="label">Add-on modules &amp; premium support</span>
-              <span class="slider-val" id="addon-val"></span>
-            </div>
-            <input type="range" id="addon" min="0" max="60" step="5" />
-            <p class="hint">% on top of license. Namespaces, HSM/FIPS, DR &amp; replication, Sentinel, and KMIP require Vault Enterprise; paid support tiers add more.</p>
-          </div>
-
-          <div class="field">
-            <div class="slider-row">
-              <span class="label">Renewal / hidden-cost uplift</span>
-              <span class="slider-val" id="uplift-val"></span>
-            </div>
-            <input type="range" id="uplift" min="0" max="120" step="5" />
-            <p class="hint">Procurement data shows 25–60% at renewal — and real cases run higher. Default is the floor.</p>
-          </div>
-
-          <div class="field">
-            <div class="slider-row">
-              <span class="label">Annual growth (clients & team)</span>
-              <span class="slider-val" id="growth-val"></span>
-            </div>
-            <input type="range" id="growth" min="0" max="60" step="5" />
-            <p class="hint">Applied across the 3-year view.</p>
           </div>
 
           <div style="display:flex; gap:10px;">
@@ -570,10 +617,12 @@ function applyPreset(stage) {
     uplift: MODEL.upliftDefault,
     growth: MODEL.growthDefault,
     perClient: MODEL.perClientMonth,
+    customQuote: false,   // false = use HCP list price ($72.92)
     periodMult: MODEL.periodMultiplier,
     maintShare: MODEL.maintShareDefault,
     psFee: p.psFee,
     addon: p.addon,
+    cat: { subscription: true, operational: true, growth: true },
   };
 }
 
@@ -597,18 +646,28 @@ function vaultLicenseAnnual(s, clients) {
 }
 
 function computeVaultYear(s, yearIndex) {
-  const g = Math.pow(1 + s.growth / 100, yearIndex);
+  const cat = s.cat || { subscription: true, operational: true, growth: true };
+  // Growth off → no compounding across the 3-year view.
+  const g = cat.growth ? Math.pow(1 + s.growth / 100, yearIndex) : 1;
   const clients = Math.round(s.clients * g);
   const fte = s.fte * g;
-  const { license, infra } = vaultLicenseAnnual(s, clients);
-  const people = fte * s.salary;
+
+  // Vault subscription: license + infra + add-on modules.
+  let { license, infra } = vaultLicenseAnnual(s, clients);
+  if (!cat.subscription) { license = 0; infra = 0; }
+  const addons = cat.subscription ? license * (s.addon / 100) : 0;
+
+  // Operational overhead: people + ramp + professional services.
+  const people = cat.operational ? fte * s.salary : 0;
   const maint = people * s.maintShare;     // portion attributable to upgrades/patching/DR
   const ops = people - maint;              // steady-state operation
-  const uplift = license * (s.uplift / 100);
-  const addons = license * (s.addon / 100);   // enterprise modules + premium support, as % of license
-  const onboard = yearIndex === 0 ? s.fte * s.salary * (s.onboard / 12) : 0;
-  const ps = yearIndex === 0 ? s.psFee : 0;
-  const total = license + infra + people + addons + uplift + onboard + ps;
+  const onboard = (cat.operational && yearIndex === 0) ? s.fte * s.salary * (s.onboard / 12) : 0;
+  const ps = (cat.operational && yearIndex === 0) ? s.psFee : 0;
+
+  // Growth & renewal: renewal uplift on the licensed spend.
+  const uplift = cat.growth ? license * (s.uplift / 100) : 0;
+
+  const total = license + infra + addons + people + uplift + onboard + ps;
   return { clients, fte, license, infra, people, ops, maint, addons, uplift, onboard, ps, total };
 }
 
@@ -673,12 +732,16 @@ function render() {
   });
 
   // callout — the insight
-  const peoplePct = ((y1.people + y1.onboard) / y1.total) * 100;
-  const maintPct = ((y1.maint + y1.onboard) / y1.total) * 100;
-  const licPct = (y1.license / y1.total) * 100;
-  document.getElementById('callout').innerHTML =
-    'People and ramp are <strong>' + peoplePct.toFixed(0) + '%</strong> of year-one cost — of which upgrades, patching, DR and initial ramp alone are <strong>' + maintPct.toFixed(0) + '%</strong>' +
-    (S.deploy !== 'community' ? '. The license you actually get quoted is <strong>' + licPct.toFixed(0) + '%</strong>.' : '. The "free" tier still costs ' + fmt$(y1.total) + '/yr to operate.');
+  if (y1.total <= 0) {
+    document.getElementById('callout').innerHTML = 'Turn on a cost category in the customize panel to see an estimate.';
+  } else {
+    const peoplePct = ((y1.people + y1.onboard) / y1.total) * 100;
+    const maintPct = ((y1.maint + y1.onboard) / y1.total) * 100;
+    const licPct = (y1.license / y1.total) * 100;
+    document.getElementById('callout').innerHTML =
+      'People and ramp are <strong>' + peoplePct.toFixed(0) + '%</strong> of year-one cost — of which upgrades, patching, DR and initial ramp alone are <strong>' + maintPct.toFixed(0) + '%</strong>' +
+      (S.deploy !== 'community' ? '. The license you actually get quoted is <strong>' + licPct.toFixed(0) + '%</strong>.' : '. The "free" tier still costs ' + fmt$(y1.total) + '/yr to operate.');
+  }
 
   // 3-year table
   const tbl = document.getElementById('years-table');
@@ -719,6 +782,9 @@ function renderAssumptions() {
 
 function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
 function trimNum(n){ return Number.isInteger(n) ? n : n.toFixed(2).replace(/0$/,''); }
+// qualitative "what's this typical of" descriptors
+function fteTag(v){ return v === 0 ? 'none' : v <= 0.75 ? 'lean' : v <= 2 ? 'typical' : v <= 5 ? 'large team' : 'big org'; }
+function onboardTag(v){ return v <= 1 ? 'optimistic' : v <= 3 ? 'typical' : v <= 6 ? 'large / multi-region' : 'very large'; }
 
 function renderNotes() {
   const notes = [
@@ -744,16 +810,30 @@ function syncControls() {
   document.getElementById('cluster-size').value = S.clusterSize;
   setRange('clients', S.clients, v => v.toLocaleString());
   setRange('clusters', S.clusters, v => v);
-  setRange('perclient', S.perClient, v => '$' + Number(v).toFixed(2));
   setRange('periodmult', S.periodMult, v => v + '×');
-  setRange('fte', S.fte, v => trimNum(v) + ' FTE');
+  setRange('fte', S.fte, v => trimNum(v) + ' FTE · ' + fteTag(v));
   setRange('salary', S.salary, v => fmt$k(v));
   setRange('maintshare', Math.round(S.maintShare * 100), v => v + '%');
-  setRange('onboard', S.onboard, v => v === 0 ? 'instant' : trimNum(v) + ' mo');
+  setRange('onboard', S.onboard, v => v === 0 ? 'instant' : trimNum(v) + ' mo · ' + onboardTag(v));
   setRange('psfee', S.psFee, v => Number(v) === 0 ? 'none' : fmt$k(v));
   setRange('addon', S.addon, v => Number(v) === 0 ? 'none' : '+' + v + '%');
   setRange('uplift', S.uplift, v => v + '%');
   setRange('growth', S.growth, v => v + '% / yr');
+
+  // per-client fee: list price by default, optional custom quote
+  document.getElementById('perclient-val').textContent = '$' + S.perClient.toFixed(2);
+  const cq = document.getElementById('custom-quote');
+  cq.checked = S.customQuote;
+  const pin = document.getElementById('perclient-input');
+  pin.classList.toggle('hidden', !S.customQuote);
+  pin.value = S.perClient;
+
+  // category toggles + collapse
+  ['subscription', 'operational', 'growth'].forEach(name => {
+    const on = !S.cat || S.cat[name];
+    document.querySelectorAll('.cat-toggle[data-cat="' + name + '"]').forEach(t => t.setAttribute('aria-pressed', on ? 'true' : 'false'));
+    document.querySelectorAll('.cat[data-cat="' + name + '"]').forEach(c => c.classList.toggle('cat--off', !on));
+  });
 }
 function setSeg(id, attr, val) {
   document.querySelectorAll('#' + id + ' button').forEach(b =>
@@ -783,7 +863,6 @@ function wire() {
   document.getElementById('cluster-size').addEventListener('change', e => { S.clusterSize = e.target.value; markCustom(); render(); });
   const bind = (id, key, parse) => document.getElementById(id).addEventListener('input', e => { S[key] = parse(e.target.value); markCustom(); render(); });
   bind('clients', 'clients', Number);
-  bind('perclient', 'perClient', Number);
   bind('periodmult', 'periodMult', Number);
   bind('clusters', 'clusters', Number);
   bind('fte', 'fte', Number);
@@ -794,6 +873,23 @@ function wire() {
   bind('uplift', 'uplift', Number);
   bind('growth', 'growth', Number);
   document.getElementById('maintshare').addEventListener('input', e => { S.maintShare = Number(e.target.value) / 100; markCustom(); render(); });
+
+  // per-client custom quote
+  document.getElementById('custom-quote').addEventListener('change', e => {
+    S.customQuote = e.target.checked;
+    if (!S.customQuote) S.perClient = MODEL.perClientMonth;   // back to HCP list price
+    else markCustom();
+    render();
+  });
+  document.getElementById('perclient-input').addEventListener('input', e => {
+    S.perClient = Number(e.target.value) || 0;
+    markCustom(); render();
+  });
+
+  // category on/off toggles
+  document.querySelectorAll('.cat-toggle').forEach(t =>
+    t.addEventListener('click', () => { S.cat[t.dataset.cat] = !S.cat[t.dataset.cat]; markCustom(); render(); }));
+
   document.getElementById('reset').addEventListener('click', () => { applyPreset(S.preset || 'midmarket'); render(); });
   document.getElementById('customize-toggle').addEventListener('click', () => {
     document.getElementById('assumptions').classList.add('hidden');
