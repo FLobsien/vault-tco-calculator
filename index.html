@@ -106,9 +106,10 @@
     background: transparent;
     border: none;
     border-right: 1px solid var(--border);
-    padding: 9px 6px;
+    padding: 8px 4px;
     font-family: var(--font);
-    font-size: 13px;
+    font-size: 12px;
+    white-space: nowrap;
     color: var(--text-subtle);
     cursor: pointer;
     transition: color .15s var(--ease), background .15s var(--ease);
@@ -283,11 +284,12 @@
         <p class="panel-note">Pick the closest match. We fill in sensible assumptions — change any of them if you want.</p>
 
         <div class="field">
-          <span class="label">Company stage</span>
-          <div class="seg" id="seg-stage" role="group" aria-label="Company stage">
+          <span class="label">Presets</span>
+          <div class="seg" id="seg-stage" role="group" aria-label="Presets">
             <button data-stage="startup" aria-pressed="false">Startup</button>
             <button data-stage="midmarket" aria-pressed="true">Mid-market</button>
             <button data-stage="enterprise" aria-pressed="false">Enterprise</button>
+            <button data-stage="custom" aria-pressed="false">Custom</button>
           </div>
           <p class="hint" id="stage-hint"></p>
         </div>
@@ -556,6 +558,7 @@ function applyPreset(stage) {
   const p = MODEL.presets[stage];
   S = {
     stage,
+    preset: stage,        // remembered base preset, for "Reset to preset"
     deploy: 'hcp',
     tier: 'standard',
     clusterSize: p.clusterSize,
@@ -573,6 +576,9 @@ function applyPreset(stage) {
     addon: p.addon,
   };
 }
+
+// Any edit to an assumption flips the preset selector to "Custom".
+function markCustom() { if (S.stage !== 'custom') S.stage = 'custom'; }
 
 /* ---------------- compute ---------------- */
 function vaultLicenseAnnual(s, clients) {
@@ -616,7 +622,8 @@ function render() {
   document.querySelectorAll('.hcp-only').forEach(el => el.classList.toggle('hidden', S.deploy !== 'hcp'));
   const sh = { startup: 'Early team, a handful of services, a single environment.',
                midmarket: 'Several teams and environments, a growing platform footprint.',
-               enterprise: 'Many teams, multiple regions, strict uptime and compliance needs.' };
+               enterprise: 'Many teams, multiple regions, strict uptime and compliance needs.',
+               custom: 'Your own numbers — every assumption below is editable.' };
   document.getElementById('stage-hint').textContent = sh[S.stage];
   const dh = { hcp: 'Single-tenant managed cloud. You pay for the cluster plus a per-client fee.',
                enterprise: 'The same Vault binary on your own infrastructure. License is not public — we estimate it.',
@@ -759,13 +766,22 @@ function setRange(id, val, fmt) {
 
 function wire() {
   document.querySelectorAll('#seg-stage button').forEach(b =>
-    b.addEventListener('click', () => { applyPreset(b.dataset.stage); render(); }));
+    b.addEventListener('click', () => {
+      if (b.dataset.stage === 'custom') {
+        S.stage = 'custom';
+        document.getElementById('assumptions').classList.add('hidden');
+        document.getElementById('advanced').classList.remove('hidden');
+      } else {
+        applyPreset(b.dataset.stage);
+      }
+      render();
+    }));
   document.querySelectorAll('#seg-deploy button').forEach(b =>
     b.addEventListener('click', () => { S.deploy = b.dataset.deploy; render(); }));
   document.querySelectorAll('#seg-tier button').forEach(b =>
-    b.addEventListener('click', () => { S.tier = b.dataset.tier; render(); }));
-  document.getElementById('cluster-size').addEventListener('change', e => { S.clusterSize = e.target.value; render(); });
-  const bind = (id, key, parse) => document.getElementById(id).addEventListener('input', e => { S[key] = parse(e.target.value); render(); });
+    b.addEventListener('click', () => { S.tier = b.dataset.tier; markCustom(); render(); }));
+  document.getElementById('cluster-size').addEventListener('change', e => { S.clusterSize = e.target.value; markCustom(); render(); });
+  const bind = (id, key, parse) => document.getElementById(id).addEventListener('input', e => { S[key] = parse(e.target.value); markCustom(); render(); });
   bind('clients', 'clients', Number);
   bind('perclient', 'perClient', Number);
   bind('periodmult', 'periodMult', Number);
@@ -777,8 +793,8 @@ function wire() {
   bind('addon', 'addon', Number);
   bind('uplift', 'uplift', Number);
   bind('growth', 'growth', Number);
-  document.getElementById('maintshare').addEventListener('input', e => { S.maintShare = Number(e.target.value) / 100; render(); });
-  document.getElementById('reset').addEventListener('click', () => { applyPreset(S.stage); render(); });
+  document.getElementById('maintshare').addEventListener('input', e => { S.maintShare = Number(e.target.value) / 100; markCustom(); render(); });
+  document.getElementById('reset').addEventListener('click', () => { applyPreset(S.preset || 'midmarket'); render(); });
   document.getElementById('customize-toggle').addEventListener('click', () => {
     document.getElementById('assumptions').classList.add('hidden');
     document.getElementById('advanced').classList.remove('hidden');
