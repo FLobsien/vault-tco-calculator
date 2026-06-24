@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="robots" content="noindex, nofollow, noarchive, noimageindex" />
-<meta name="googlebot" content="noindex, nofollow, noarchive" />
-<title>What HashiCorp Vault actually costs — TCO calculator</title>
+<meta name="robots" content="index, follow" />
+<meta name="description" content="How much does HashiCorp Vault cost? See HCP Vault Dedicated and Vault Enterprise pricing, the $72.92 per-client fee, what the sticker price leaves out, and a full total-cost-of-ownership calculator." />
+<title>HashiCorp Vault Pricing: HCP & Enterprise TCO Calculator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
 <style>
@@ -277,6 +277,24 @@
   sup a { font-family: var(--mono); font-size: 10px; text-decoration: none; color: var(--text-subtle); border: 1px solid var(--border); padding: 0 3px; margin-left: 4px; }
 
   .section-title { margin: 32px 0 14px; }
+  /* ---------- SEO / explainer content ---------- */
+  .content { background: var(--bg); border-top: 1px solid var(--border); padding: 64px 0; }
+  .content .wrap { max-width: 820px; }
+  .content h2 { font-weight: 500; font-size: clamp(26px, 3.5vw, 38px); line-height: 1.12; letter-spacing: -0.025em; margin: 0 0 18px; }
+  .content h2:not(:first-child) { margin-top: 56px; }
+  .content h3 { font-weight: 600; font-size: 19px; margin: 34px 0 10px; letter-spacing: -0.01em; }
+  .content p { font-size: 16px; color: var(--text); margin-bottom: 16px; max-width: 72ch; }
+  .content p.lead { font-size: 19px; }
+  .content a { color: #000; text-decoration: underline; text-underline-offset: 2px; }
+  .content ul.plain { list-style: none; margin: 0 0 16px; }
+  .content ul.plain li { position: relative; padding-left: 22px; margin-bottom: 12px; font-size: 16px; max-width: 72ch; }
+  .content ul.plain li::before { content: ""; position: absolute; left: 0; top: 9px; width: 8px; height: 8px; background: var(--volt); }
+  .content .pricetable { width: 100%; border-collapse: collapse; margin: 8px 0 20px; }
+  .content .pricetable th, .content .pricetable td { padding: 11px 14px; border-bottom: 1px solid var(--border); font-size: 14px; text-align: left; }
+  .content .pricetable th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-subtle); font-weight: 400; }
+  .content .pricetable td.num { font-family: var(--mono); text-align: right; }
+  .content .faq h3 { font-size: 18px; margin-top: 28px; }
+
   footer.foot { background: var(--bg-dark); color: var(--text-on-dark-subtle); padding: 28px 0; font-size: 12px; }
   footer.foot a { color: var(--text-on-dark); }
 </style>
@@ -533,6 +551,114 @@
     </div>
   </div>
 </main>
+
+<section class="content" aria-label="HashiCorp Vault pricing explained">
+  <div class="wrap">
+    <h2>How much does HashiCorp Vault cost?</h2>
+    <p class="lead">HashiCorp Vault pricing depends on which Vault you run. There are three paths to production, and the price you are quoted on each is only one slice of the real total cost of ownership.</p>
+    <p>The calculator above models all three. This section breaks down the published list prices behind it, what each pricing model includes, and the operational costs that never show up on an order form.</p>
+
+    <h3>HCP Vault Dedicated pricing</h3>
+    <p>HCP Vault Dedicated is HashiCorp's single-tenant managed cloud offering. It bills two ways at once: a fixed monthly fee for the cluster, and a per-client fee for everything that authenticates to it. There are two tiers, Essentials and Standard, across three cluster sizes.</p>
+    <table class="pricetable">
+      <tr><th>Tier and cluster size</th><th>Published monthly cluster fee</th></tr>
+      <tr><td>Essentials · Small</td><td class="num">$1,152</td></tr>
+      <tr><td>Essentials · Medium</td><td class="num">$2,307</td></tr>
+      <tr><td>Essentials · Large</td><td class="num">$5,468</td></tr>
+      <tr><td>Standard · Small</td><td class="num">$1,345</td></tr>
+      <tr><td>Standard · Medium</td><td class="num">$2,694</td></tr>
+      <tr><td>Standard · Large</td><td class="num">$6,870</td></tr>
+    </table>
+    <p>On top of the cluster fee, HCP Vault Dedicated charges <strong>$72.92 per client, per month</strong> on both tiers. A client is anything that authenticates to Vault: an application, a service, or a user. HashiCorp counts a billable client once per active billing period rather than once for its lifetime, so machine and short-lived identities can add up quickly. Cluster and per-client figures come from <a href="https://www.ibm.com/products/hashicorp/pricing" target="_blank" rel="noopener">IBM's published HashiCorp Vault pricing</a>, and the <a href="https://developer.hashicorp.com/vault/docs/concepts/billing/clients/counting" target="_blank" rel="noopener">client counting documentation</a> explains the billing-period rule.</p>
+
+    <h3>Vault Enterprise pricing (self-hosted)</h3>
+    <p>Vault Enterprise is the self-managed binary you run on your own infrastructure. HashiCorp does not publish a list price for it, so the cost comes through a custom sales quote, usually as an annual license that scales with usage. Several capabilities are <a href="https://developer.hashicorp.com/vault/tutorials/get-started/available-editions" target="_blank" rel="noopener">Enterprise-only</a>: namespaces, HSM and FIPS support, performance and disaster-recovery replication, Sentinel policy, and KMIP. Needing any one of them moves you onto Enterprise licensing. On top of the license you pay for your own highly available infrastructure and the team that operates it.</p>
+
+    <h3>Vault Community (open source) pricing</h3>
+    <p>Vault Community is free to download and run, and it is open source. The license costs nothing, but the infrastructure and the engineers who keep it running do not. For most teams that operational load is the largest line in the total, which is why a free tier rarely means a free year.</p>
+
+    <h3>A note on HCP Vault Secrets</h3>
+    <p>HCP Vault Secrets is a separate, multi-tenant product focused on secrets management alone, with its own usage-based pricing that is distinct from HCP Vault Dedicated. The calculator above models Dedicated, Enterprise, and Community, the three options teams compare when sizing a full Vault deployment.</p>
+
+    <h2>What HashiCorp Vault pricing leaves out</h2>
+    <p>The license or subscription is the visible cost. The total cost of ownership is usually dominated by everything around it:</p>
+    <ul class="plain">
+      <li><strong>Engineers.</strong> Vault is a toolkit, not a finished product. Auth methods, policies, and secret engines are configured and run by hand, which usually needs a dedicated platform or SRE owner.</li>
+      <li><strong>Upgrades, patching, and disaster recovery.</strong> Vault's Raft storage means rolling upgrades and DR drills have to be planned and tested. This day-two work is the cost teams most often underestimate.</li>
+      <li><strong>Time to production.</strong> Standing Vault up with a highly available topology, storage, unseal, auth methods, and integrations commonly takes weeks to months before the first secret is served.</li>
+      <li><strong>Renewal uplift.</strong> Per-client and feature-based pricing means the bill grows as identities and requirements grow. Reported procurement data puts renewal increases at 25 to 60 percent or more.</li>
+    </ul>
+    <p>Use the calculator at the top of this page to put your own numbers against each of these.</p>
+
+    <div class="faq">
+      <h2>HashiCorp Vault pricing FAQ</h2>
+
+      <h3>How much does HashiCorp Vault cost per month?</h3>
+      <p>For HCP Vault Dedicated, the cluster fee starts at $1,152 per month on Essentials and $1,345 per month on Standard, plus $72.92 per client, per month. Vault Enterprise is quoted privately, and Vault Community is free apart from infrastructure and staffing.</p>
+
+      <h3>Is HashiCorp Vault free?</h3>
+      <p>Vault Community is free to license and open source. HCP Vault Dedicated and Vault Enterprise are paid. Even the free edition carries infrastructure and engineering costs to run in production.</p>
+
+      <h3>How does HCP Vault count clients for billing?</h3>
+      <p>A client is any application, service, or user that authenticates to Vault. HCP counts a billable client once per active billing period, so intermittent and machine identities can be counted repeatedly over time.</p>
+
+      <h3>How much is Vault Enterprise?</h3>
+      <p>HashiCorp does not publish a list price for Vault Enterprise. It is sold through a custom quote, typically an annual license that scales with usage and with Enterprise-only add-on modules such as namespaces, HSM and FIPS, replication, and Sentinel.</p>
+
+      <h3>What is the $72.92 fee in Vault pricing?</h3>
+      <p>$72.92 is the published HCP Vault Dedicated per-client, per-month fee on both the Essentials and Standard tiers. It is charged on top of the fixed monthly cluster fee, and it is often negotiated in larger contracts.</p>
+    </div>
+  </div>
+</section>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How much does HashiCorp Vault cost per month?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "For HCP Vault Dedicated, the cluster fee starts at $1,152 per month on Essentials and $1,345 per month on Standard, plus $72.92 per client, per month. Vault Enterprise is quoted privately, and Vault Community is free apart from infrastructure and staffing."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is HashiCorp Vault free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Vault Community is free to license and open source. HCP Vault Dedicated and Vault Enterprise are paid. Even the free edition carries infrastructure and engineering costs to run in production."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does HCP Vault count clients for billing?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A client is any application, service, or user that authenticates to Vault. HCP counts a billable client once per active billing period, so intermittent and machine identities can be counted repeatedly over time."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much is Vault Enterprise?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "HashiCorp does not publish a list price for Vault Enterprise. It is sold through a custom quote, typically an annual license that scales with usage and with Enterprise-only add-on modules such as namespaces, HSM and FIPS, replication, and Sentinel."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the $72.92 fee in Vault pricing?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "$72.92 is the published HCP Vault Dedicated per-client, per-month fee on both the Essentials and Standard tiers. It is charged on top of the fixed monthly cluster fee, and it is often negotiated in larger contracts."
+      }
+    }
+  ]
+}
+</script>
 
 <footer class="foot">
   <div class="wrap">
