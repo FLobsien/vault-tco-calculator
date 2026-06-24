@@ -286,9 +286,9 @@
   .notes li::before {
     content: counter(fn); position: absolute; left: 0; top: 0;
     font-family: var(--mono); font-size: 11px; width: 22px; height: 22px;
-    border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--text);
+    border: 1px dashed #000; display: flex; align-items: center; justify-content: center; color: var(--text);
   }
-  .notes li.sourced::before { border-color: #000; }
+  .notes li.sourced::before { border-style: solid; }
   .notes a { color: #000; text-decoration: underline; text-underline-offset: 2px; }
   sup a { font-family: var(--mono); font-size: 10px; text-decoration: none; color: var(--text-subtle); border: 1px solid var(--border); padding: 0 3px; margin-left: 4px; }
 
@@ -310,6 +310,23 @@
   .content .pricetable th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-subtle); font-weight: 400; }
   .content .pricetable td.num { font-family: var(--mono); text-align: right; }
   .content .faq h3 { font-size: 18px; margin-top: 28px; }
+  .content .faq { margin-top: 24px; }
+  .faq-item { border: 1px solid var(--border); border-top: none; }
+  .faq-item:first-of-type { border-top: 1px solid var(--border); }
+  .faq-item summary {
+    list-style: none; cursor: pointer; padding: 16px 18px;
+    font-size: 16px; font-weight: 600; letter-spacing: -0.01em; color: var(--text);
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item summary::after {
+    content: "+"; font-family: var(--mono); font-size: 18px; line-height: 1;
+    color: var(--text-subtle); flex: none;
+  }
+  .faq-item[open] summary::after { content: "\2013"; }
+  .faq-item summary:hover { background: var(--bg-page); }
+  .faq-item summary:focus-visible { outline: 1px solid #000; outline-offset: -1px; }
+  .faq-item > p { padding: 0 18px 18px; margin: 0; max-width: none; color: var(--text-subtle); }
 
   footer.foot { background: var(--bg-dark); color: var(--text-on-dark-subtle); padding: 28px 0; font-size: 12px; }
   footer.foot a { color: var(--text-on-dark); }
@@ -578,7 +595,7 @@
 
         <div class="notes" id="notes">
           <h3>How these numbers are built</h3>
-          <p class="panel-note" style="margin-bottom:18px;">Solid markers are taken from published pricing. Dashed markers are estimated — adjust the inputs to match your reality.</p>
+          <p class="panel-note" style="margin-bottom:18px;">Solid markers are taken from published pricing. Dashed markers are estimated. Adjust the inputs to match your reality.</p>
           <ol id="notes-list"></ol>
         </div>
 
@@ -628,20 +645,30 @@
     <div class="faq">
       <h2>HashiCorp Vault pricing FAQ</h2>
 
-      <h3>How much does HashiCorp Vault cost per month?</h3>
-      <p>For HCP Vault Dedicated, the cluster fee starts at $1,152 per month on Essentials and $1,345 per month on Standard, plus $72.92 per client, per month. Vault Enterprise is quoted privately, and Vault Community is free apart from infrastructure and staffing.</p>
+      <details class="faq-item">
+        <summary>How much does HashiCorp Vault cost per month?</summary>
+        <p>For HCP Vault Dedicated, the cluster fee starts at $1,152 per month on Essentials and $1,345 per month on Standard, plus $72.92 per client, per month. Vault Enterprise is quoted privately, and Vault Community is free apart from infrastructure and staffing.</p>
+      </details>
 
-      <h3>Is HashiCorp Vault free?</h3>
-      <p>Vault Community is free to license and open source. HCP Vault Dedicated and Vault Enterprise are paid. Even the free edition carries infrastructure and engineering costs to run in production.</p>
+      <details class="faq-item">
+        <summary>Is HashiCorp Vault free?</summary>
+        <p>Vault Community is free to license and open source. HCP Vault Dedicated and Vault Enterprise are paid. Even the free edition carries infrastructure and engineering costs to run in production.</p>
+      </details>
 
-      <h3>How does HCP Vault count clients for billing?</h3>
-      <p>A client is any application, service, or user that authenticates to Vault. HCP counts a billable client once per active billing period, so intermittent and machine identities can be counted repeatedly over time.</p>
+      <details class="faq-item">
+        <summary>How does HCP Vault count clients for billing?</summary>
+        <p>A client is any application, service, or user that authenticates to Vault. HCP counts a billable client once per active billing period, so intermittent and machine identities can be counted repeatedly over time.</p>
+      </details>
 
-      <h3>How much is Vault Enterprise?</h3>
-      <p>HashiCorp does not publish a list price for Vault Enterprise. It is sold through a custom quote, typically an annual license that scales with usage and with Enterprise-only add-on modules such as namespaces, HSM and FIPS, replication, and Sentinel.</p>
+      <details class="faq-item">
+        <summary>How much is Vault Enterprise?</summary>
+        <p>HashiCorp does not publish a list price for Vault Enterprise. It is sold through a custom quote, typically an annual license that scales with usage and with Enterprise-only add-on modules such as namespaces, HSM and FIPS, replication, and Sentinel.</p>
+      </details>
 
-      <h3>What is the $72.92 fee in Vault pricing?</h3>
-      <p>$72.92 is the published HCP Vault Dedicated per-client, per-month fee on both the Essentials and Standard tiers. It is charged on top of the fixed monthly cluster fee, and it is often negotiated in larger contracts.</p>
+      <details class="faq-item">
+        <summary>What is the $72.92 fee in Vault pricing?</summary>
+        <p>$72.92 is the published HCP Vault Dedicated per-client, per-month fee on both the Essentials and Standard tiers. It is charged on top of the fixed monthly cluster fee, and it is often negotiated in larger contracts.</p>
+      </details>
     </div>
   </div>
 </section>
