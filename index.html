@@ -306,10 +306,6 @@
   .content ul.plain { list-style: none; margin: 0 0 16px; }
   .content ul.plain li { position: relative; padding-left: 22px; margin-bottom: 12px; font-size: 16px; max-width: 72ch; }
   .content ul.plain li::before { content: ""; position: absolute; left: 0; top: 9px; width: 8px; height: 8px; background: var(--volt); }
-  .content .pricetable { width: 100%; border-collapse: collapse; margin: 8px 0 20px; }
-  .content .pricetable th, .content .pricetable td { padding: 11px 14px; border-bottom: 1px solid var(--border); font-size: 14px; text-align: left; }
-  .content .pricetable th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-subtle); font-weight: 400; }
-  .content .pricetable td.num { font-family: var(--mono); text-align: right; }
   .content .faq h3 { font-size: 18px; margin-top: 28px; }
   .content .faq { margin-top: 24px; }
   .faq-item { border: 1px solid var(--border); border-top: none; }
@@ -612,16 +608,7 @@
     <p>The calculator above models all three. This section breaks down the published list prices behind it, what each pricing model includes, and the operational costs that never show up on an order form.</p>
 
     <h3>HCP Vault Dedicated pricing</h3>
-    <p>HCP Vault Dedicated is HashiCorp's single-tenant managed cloud offering. It bills two ways at once: a fixed monthly fee for the cluster, and a per-client fee for everything that authenticates to it. There are two tiers, Essentials and Standard, across three cluster sizes.</p>
-    <table class="pricetable">
-      <tr><th>Tier and cluster size</th><th>Published monthly cluster fee</th></tr>
-      <tr><td>Essentials · Small</td><td class="num">$1,152</td></tr>
-      <tr><td>Essentials · Medium</td><td class="num">$2,307</td></tr>
-      <tr><td>Essentials · Large</td><td class="num">$5,468</td></tr>
-      <tr><td>Standard · Small</td><td class="num">$1,345</td></tr>
-      <tr><td>Standard · Medium</td><td class="num">$2,694</td></tr>
-      <tr><td>Standard · Large</td><td class="num">$6,870</td></tr>
-    </table>
+    <p>HCP Vault Dedicated is HashiCorp's single-tenant managed cloud offering. It bills two ways at once: a fixed monthly fee for the cluster, and a per-client fee for everything that authenticates to it. There are two tiers, Essentials and Standard, across three cluster sizes, with published monthly cluster fees that range from about $1,152 to $6,870 depending on tier and size. The calculator at the top of this page works from those published figures.</p>
     <p>On top of the cluster fee, HCP Vault Dedicated charges <strong>$72.92 per client, per month</strong> on both tiers. A client is anything that authenticates to Vault: an application, a service, or a user. HashiCorp counts a billable client once per active billing period rather than once for its lifetime, so machine and short-lived identities can add up quickly. Cluster and per-client figures come from <a href="https://www.ibm.com/products/hashicorp/pricing" target="_blank" rel="noopener">IBM's published HashiCorp Vault pricing</a>, and the <a href="https://developer.hashicorp.com/vault/docs/concepts/billing/clients/counting" target="_blank" rel="noopener">client counting documentation</a> explains the billing-period rule.</p>
 
     <h3>Vault Enterprise pricing (self-hosted)</h3>
