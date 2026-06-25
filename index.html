@@ -436,7 +436,7 @@
         <!-- STEP 2 · customize (revealed once a profile is picked) -->
         <div class="step hidden" id="customize-step">
           <div class="step-head"><span class="step-num">2</span><span class="step-title">Customize your assumptions</span></div>
-          <p class="panel-note" style="margin:-4px 0 18px;">Every number below starts from your profile and is editable — this is where the estimate gets real. Toggle a whole category off to isolate what you want to count.</p>
+          <p class="panel-note" style="margin:-4px 0 18px;">Every number below starts from your profile and is fully editable. This is where the estimate gets real. Toggle a whole category off to isolate what you want to count.</p>
 
           <div id="advanced">
 
@@ -605,13 +605,13 @@
         <div class="result-empty" id="result-empty">
           <span class="label">Your estimate</span>
           <div class="empty-num">$—<span class="yr"> / yr</span></div>
-          <p>Pick the profile closest to your team on the left. We build your full Vault cost breakdown — subscription, engineers, upgrades, onboarding and renewal — from there.</p>
+          <p>Pick the profile closest to your team on the left. We build your full Vault cost breakdown from there: subscription, engineers, upgrades, onboarding and renewal.</p>
         </div>
 
         <div id="result-live" class="hidden">
           <div class="result-top">
             <div class="label">Estimated annual TCO · year 1</div>
-            <div class="bignum vault-num" id="vault-total">—</div>
+            <div class="bignum vault-num" id="vault-total"><span id="vault-fig">—</span><span class="yr"> / yr</span></div>
             <div class="delta-sub" id="vault-mode-line"></div>
           </div>
 
@@ -930,6 +930,49 @@ function computeVaultYear(s, yearIndex) {
 const fmt$ = n => '$' + Math.round(n).toLocaleString('en-US');
 const fmt$k = n => n >= 1000 ? '$' + (Math.round(n / 100) / 10).toLocaleString('en-US') + 'k' : '$' + Math.round(n);
 
+/* ---------------- headline "decrypting" scramble ----------------
+   Adapted from infisical-web's CipherText: each position cycles random
+   glyphs, then locks in left-to-right. Runs only on a "calculate" action
+   (profile pick / reset); slider drags call setNumber() and snap instantly. */
+const CIPHER_GLYPHS = '0123456789ABCDEF#$%&*+=<>?/';
+const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let cipherRAF = null;
+
+function setNumber(figStr) {
+  if (cipherRAF) { cancelAnimationFrame(cipherRAF); cipherRAF = null; }
+  document.getElementById('vault-fig').textContent = figStr;
+}
+
+function scrambleNumber() {
+  const el = document.getElementById('vault-fig');
+  const target = el.textContent;            // render() has already set the final value
+  if (reduceMotion || !target || target === '—') return;
+  if (cipherRAF) cancelAnimationFrame(cipherRAF);
+
+  const stagger = 55, revealPerChar = 240, glyphInterval = 50, tail = 180;
+  const total = target.length * stagger + revealPerChar + tail;
+  const rand = () => CIPHER_GLYPHS[Math.floor(Math.random() * CIPHER_GLYPHS.length)];
+  const state = target.split('').map(() => ({ lastSwap: 0, glyph: rand() }));
+  const start = performance.now();
+
+  const tick = now => {
+    const elapsed = now - start;
+    let out = '';
+    for (let i = 0; i < target.length; i++) {
+      const ch = target[i];
+      if (ch === ' ') { out += ' '; continue; }
+      if (elapsed >= i * stagger + revealPerChar) { out += ch; continue; }
+      const s = state[i];
+      if (elapsed - s.lastSwap >= glyphInterval) { s.glyph = rand(); s.lastSwap = elapsed; }
+      out += s.glyph;
+    }
+    el.textContent = out;
+    if (elapsed < total) { cipherRAF = requestAnimationFrame(tick); }
+    else { el.textContent = target; cipherRAF = null; }
+  };
+  cipherRAF = requestAnimationFrame(tick);
+}
+
 /* ---------------- render ---------------- */
 function render() {
   // sync visibility
@@ -948,7 +991,7 @@ function render() {
   const y1 = computeVaultYear(S, 0);
 
   // top numbers
-  document.getElementById('vault-total').innerHTML = fmt$(y1.total) + ' <span class="yr">/ yr</span>';
+  setNumber(fmt$(y1.total));
   const modeName = { hcp: 'HCP Vault Dedicated · ' + cap(S.tier), enterprise: 'Vault Enterprise · self-hosted', community: 'Vault Community · self-hosted' }[S.deploy];
   document.getElementById('vault-mode-line').textContent = modeName + ' · ' + y1.clients.toLocaleString() + ' clients · ' + trimNum(S.fte) + ' FTE';
 
@@ -1090,6 +1133,7 @@ function wire() {
       }
       startCalc();
       render();
+      scrambleNumber();
     }));
   document.querySelectorAll('#seg-deploy button').forEach(b =>
     b.addEventListener('click', () => { S.deploy = b.dataset.deploy; render(); }));
@@ -1125,7 +1169,7 @@ function wire() {
   document.querySelectorAll('.cat-toggle').forEach(t =>
     t.addEventListener('click', () => { S.cat[t.dataset.cat] = !S.cat[t.dataset.cat]; markCustom(); render(); }));
 
-  document.getElementById('reset').addEventListener('click', () => { applyPreset(S.preset || 'midmarket'); render(); });
+  document.getElementById('reset').addEventListener('click', () => { applyPreset(S.preset || 'midmarket'); render(); scrambleNumber(); });
 }
 
 /* ---------------- init ---------------- */
