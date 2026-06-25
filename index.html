@@ -163,6 +163,15 @@
     cursor: pointer; transition: color .15s var(--ease), border-color .15s var(--ease);
   }
   .reset:hover { color: #000; border-color: #000; }
+  .customize-cta {
+    width: 100%; margin-top: 16px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    background: var(--volt); color: #000; border: 1px solid #000;
+    padding: 11px 16px; font-family: var(--font); font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: background .15s var(--ease), color .15s var(--ease);
+  }
+  .customize-cta:hover { background: transparent; color: #000; }
+  .customize-cta:focus-visible { outline: 1px solid #000; outline-offset: 2px; }
   .stack { display: flex; flex-direction: column; gap: 0; }
   .hidden { display: none !important; }
 
@@ -205,6 +214,22 @@
   .delta-num { font-size: clamp(28px, 4vw, 40px); }
   .delta-num .mk { background: var(--volt); color: #000; padding: 0 6px; }
   .delta-sub { color: var(--text-on-dark-subtle); font-size: 13px; margin-top: 10px; max-width: 34ch; }
+
+  /* result placeholder — shown until the user picks a profile */
+  .result-empty {
+    background: var(--bg); border: 1px dashed var(--border);
+    padding: 48px 36px;
+  }
+  .result-empty > .label { display: block; margin-bottom: 14px; }
+  .result-empty .empty-num {
+    font-family: var(--mono); font-weight: 600; line-height: 1;
+    font-size: clamp(34px, 5vw, 52px); color: var(--border);
+  }
+  .result-empty .empty-num .yr { font-size: 16px; }
+  .result-empty p { margin-top: 18px; max-width: 42ch; color: var(--text-subtle); font-size: 15px; }
+  #result-live { display: flex; flex-direction: column; gap: 24px; }
+  #result-live:not(.hidden) { animation: reveal .35s var(--ease); }
+  @keyframes reveal { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
   /* breakdown bars */
   .breakdown { margin-top: 24px; }
@@ -281,15 +306,26 @@
 
   /* footnotes */
   .notes { margin-top: 40px; border-top: 1px solid var(--border); padding-top: 28px; }
-  .notes h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+  .notes > summary {
+    list-style: none; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    font-size: 16px; font-weight: 600; color: var(--text);
+  }
+  .notes > summary::-webkit-details-marker { display: none; }
+  .notes > summary::after {
+    content: "+"; font-family: var(--mono); font-size: 18px; line-height: 1;
+    color: var(--text-subtle); flex: none;
+  }
+  .notes[open] > summary { margin-bottom: 16px; }
+  .notes[open] > summary::after { content: "\2013"; }
+  .notes > summary:focus-visible { outline: 1px solid #000; outline-offset: 2px; }
   .notes ol { list-style: none; counter-reset: fn; }
   .notes li { counter-increment: fn; position: relative; padding-left: 34px; margin-bottom: 14px; font-size: 13px; color: var(--text-subtle); max-width: 90ch; }
   .notes li::before {
     content: counter(fn); position: absolute; left: 0; top: 0;
     font-family: var(--mono); font-size: 11px; width: 22px; height: 22px;
-    border: 1px dashed #000; display: flex; align-items: center; justify-content: center; color: var(--text);
+    border: 1px solid #000; display: flex; align-items: center; justify-content: center; color: var(--text);
   }
-  .notes li.sourced::before { border-style: solid; }
   .notes a { color: #000; text-decoration: underline; text-underline-offset: 2px; }
   sup a { font-family: var(--mono); font-size: 10px; text-decoration: none; color: var(--text-subtle); border: 1px solid var(--border); padding: 0 3px; margin-left: 4px; }
 
@@ -334,7 +370,7 @@
 <div class="topbar">
   <div class="wrap">
     <p>Comparing HashiCorp Vault and Infisical? Get a side-by-side cost and migration read from someone who has done it.</p>
-    <a class="tb-cta" href="https://infisical.com/schedule-demo" target="_blank" rel="noopener">Talk to an expert →</a>
+    <a class="tb-cta" href="https://infisical.com/talk-to-us?utm_source=tco-calculator&utm_medium=microapp&utm_campaign=vault-tco" target="_blank" rel="noopener">Talk to an expert →</a>
   </div>
 </div>
 
@@ -352,21 +388,21 @@
 
       <!-- ============ INPUTS ============ -->
       <section class="panel" aria-label="Inputs">
-        <h2>Estimate for</h2>
-        <p class="panel-note">Pick the closest match. We fill in sensible assumptions — change any of them if you want.</p>
+        <h2>Calculate your cost</h2>
+        <p class="panel-note">Pick the profile closest to your team. We build the estimate from there — then customize any assumption to match your reality.</p>
 
         <div class="field">
-          <span class="label">Presets</span>
+          <span class="label">Start here · pick a profile</span>
           <div class="seg" id="seg-stage" role="group" aria-label="Presets">
             <button data-stage="startup" aria-pressed="false">Startup</button>
-            <button data-stage="midmarket" aria-pressed="true">Mid-market</button>
+            <button data-stage="midmarket" aria-pressed="false">Mid-market</button>
             <button data-stage="enterprise" aria-pressed="false">Enterprise</button>
             <button data-stage="custom" aria-pressed="false">Custom</button>
           </div>
           <p class="hint" id="stage-hint"></p>
         </div>
 
-        <div class="field">
+        <div class="field hidden" id="field-deploy">
           <span class="label">Which Vault</span>
           <div class="seg" id="seg-deploy" role="group" aria-label="Deployment model">
             <button data-deploy="hcp" aria-pressed="true">HCP Vault Dedicated</button>
@@ -376,11 +412,11 @@
           <p class="hint" id="deploy-hint"></p>
         </div>
 
-        <!-- transparent assumptions: the default view -->
-        <div class="assumptions" id="assumptions">
+        <!-- transparent assumptions: shown once a profile is picked -->
+        <div class="assumptions hidden" id="assumptions">
           <span class="label">What we assume for this profile</span>
           <ul id="assume-list"></ul>
-          <button class="reset" id="customize-toggle">Customize these →</button>
+          <button class="customize-cta" id="customize-toggle">Customize these numbers →</button>
         </div>
 
         <!-- advanced editable controls, hidden until "Customize" -->
@@ -550,24 +586,33 @@
       <!-- ============ RESULTS ============ -->
       <section aria-label="Results" class="stack" style="gap:24px;">
 
-        <div class="result-top">
-          <div class="label">Estimated annual TCO · year 1</div>
-          <div class="bignum vault-num" id="vault-total">—</div>
-          <div class="delta-sub" id="vault-mode-line"></div>
+        <!-- placeholder until a profile is picked -->
+        <div class="result-empty" id="result-empty">
+          <span class="label">Your estimate</span>
+          <div class="empty-num">$—<span class="yr"> / yr</span></div>
+          <p>Pick the profile closest to your team on the left. We build your full Vault cost breakdown — subscription, engineers, upgrades, onboarding and renewal — from there.</p>
         </div>
 
-        <div class="panel">
-          <h2>Where the money goes</h2>
-          <p class="panel-note">Year 1, by cost category. The line item you were quoted is rarely the largest.</p>
-          <div class="bar-track" id="bar-track"></div>
-          <div class="legend" id="legend"></div>
-          <div class="callout" id="callout"></div>
-        </div>
+        <div id="result-live" class="hidden">
+          <div class="result-top">
+            <div class="label">Estimated annual TCO · year 1</div>
+            <div class="bignum vault-num" id="vault-total">—</div>
+            <div class="delta-sub" id="vault-mode-line"></div>
+          </div>
 
-        <div class="panel">
-          <h2>Three-year projection</h2>
-          <p class="panel-note">With growth compounding clients and team. Onboarding hits year 1 only.</p>
-          <table class="years" id="years-table"></table>
+          <div class="panel">
+            <h2>Where the money goes</h2>
+            <p class="panel-note">Year 1, by cost category. The line item you were quoted is rarely the largest.</p>
+            <div class="bar-track" id="bar-track"></div>
+            <div class="legend" id="legend"></div>
+            <div class="callout" id="callout"></div>
+          </div>
+
+          <div class="panel">
+            <h2>Three-year projection</h2>
+            <p class="panel-note">With growth compounding clients and team. Onboarding hits year 1 only.</p>
+            <table class="years" id="years-table"></table>
+          </div>
         </div>
 
         <div class="confess">
@@ -587,14 +632,14 @@
           <h2>We make a secrets manager too.</h2>
           <p>We built this to be fair: every figure leans on HashiCorp's own published pricing, every assumption is conservative and labelled, and you can change all of them. But full disclosure: we're Infisical, we make an open-source secrets platform, and to the surprise of absolutely no one, we think you should look at it too.</p>
           <p>Many of the teams who run these numbers are evaluating Vault and Infisical side by side. A lot of them choose us, for the open-source core, the Postgres-based architecture (no Raft to certify), and setup measured in hours rather than the months above. We'll let you judge the cost side yourself.</p>
-          <a class="cta" href="https://infisical.com" target="_blank" rel="noopener">See what Infisical does →</a>
+          <a class="cta" href="https://infisical.com/?utm_source=tco-calculator&utm_medium=microapp&utm_campaign=vault-tco" target="_blank" rel="noopener">See what Infisical does →</a>
         </div>
 
-        <div class="notes" id="notes">
-          <h3>How these numbers are built</h3>
-          <p class="panel-note" style="margin-bottom:18px;">Solid markers are taken from published pricing. Dashed markers are estimated. Adjust the inputs to match your reality.</p>
+        <details class="notes" id="notes">
+          <summary>How these numbers are built</summary>
+          <p class="panel-note" style="margin-bottom:18px;">Every figure leans on HashiCorp's published pricing where it exists and clearly-flagged, conservative assumptions where it doesn't. Adjust the inputs to match your reality.</p>
           <ol id="notes-list"></ol>
-        </div>
+        </details>
 
       </section>
     </div>
@@ -777,6 +822,23 @@ const TOOLTIPS = {
 
 /* ---------------- state ---------------- */
 let S = {};
+let started = false;   // result stays an inert placeholder until the user picks a profile
+
+// Reveal the live estimate the first time the user picks a profile.
+function startCalc() {
+  if (started) return;
+  started = true;
+  document.getElementById('result-empty').classList.add('hidden');
+  document.getElementById('result-live').classList.remove('hidden');
+  document.getElementById('field-deploy').classList.remove('hidden');
+}
+
+// Pre-start view: only the profile chooser is live; the rest waits.
+function showEmptyState() {
+  document.getElementById('stage-hint').textContent =
+    'Pick the profile closest to your team and we build your estimate.';
+  renderNotes();   // safe to populate now — uses static copy, no inputs
+}
 function applyPreset(stage) {
   const p = MODEL.presets[stage];
   S = {
@@ -1024,11 +1086,16 @@ function wire() {
   document.querySelectorAll('#seg-stage button').forEach(b =>
     b.addEventListener('click', () => {
       if (b.dataset.stage === 'custom') {
+        if (!started) applyPreset('midmarket');   // seed sensible numbers to customize from
         S.stage = 'custom';
+        startCalc();
         document.getElementById('assumptions').classList.add('hidden');
         document.getElementById('advanced').classList.remove('hidden');
       } else {
         applyPreset(b.dataset.stage);
+        startCalc();
+        document.getElementById('advanced').classList.add('hidden');
+        document.getElementById('assumptions').classList.remove('hidden');
       }
       render();
     }));
@@ -1078,9 +1145,8 @@ function wire() {
 }
 
 /* ---------------- init ---------------- */
-applyPreset('midmarket');
 wire();
-render();
+showEmptyState();   // no preset selected yet — result is a placeholder until the user acts
 
 // Safety net: every external link opens in a new tab. Notes re-render on each
 // interaction, so re-apply after renders too.
