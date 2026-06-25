@@ -696,27 +696,67 @@
 
       <details class="faq-item">
         <summary>How much does HashiCorp Vault cost per month?</summary>
-        <p>For HCP Vault Dedicated, the cluster fee starts at $1,152 per month on Essentials and $1,345 per month on Standard, plus $72.92 per client, per month. Vault Enterprise is quoted privately, and Vault Community is free apart from infrastructure and staffing.</p>
+        <p>HCP Vault Dedicated starts at about $1,152 per month for an Essentials cluster and $1,345 per month for Standard, plus $72.92 per client, per month. Vault Enterprise is quoted privately with no public list price, and Vault Community is free to license. The subscription is usually the smaller part of the real cost once you add the engineers and infrastructure needed to run it.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>What is the total cost of ownership of HashiCorp Vault?</summary>
+        <p>The total cost of ownership combines the subscription or license, cloud infrastructure, the engineers who operate and upgrade Vault, the time it takes to reach production, and renewal increases. For most teams, staffing and operations are the largest line and often exceed the subscription itself. The calculator at the top of this page estimates the full figure from your own inputs.</p>
       </details>
 
       <details class="faq-item">
         <summary>Is HashiCorp Vault free?</summary>
-        <p>Vault Community is free to license and open source. HCP Vault Dedicated and Vault Enterprise are paid. Even the free edition carries infrastructure and engineering costs to run in production.</p>
+        <p>Vault Community edition is free to license and can be self-hosted at no software cost, while HCP Vault Dedicated and Vault Enterprise are paid. The free edition is not free to operate, though: you still pay for highly available infrastructure and the engineering time to run, secure, and upgrade it.</p>
       </details>
 
       <details class="faq-item">
-        <summary>How does HCP Vault count clients for billing?</summary>
-        <p>A client is any application, service, or user that authenticates to Vault. HCP counts a billable client once per active billing period, so intermittent and machine identities can be counted repeatedly over time.</p>
+        <summary>Is HashiCorp Vault open source?</summary>
+        <p>Vault is source-available rather than open source. In August 2023 HashiCorp relicensed it from the MPL 2.0 to the Business Source License (BSL 1.1), so the source is public and free to self-host for most uses, but you cannot use it to build a competing commercial offering. Teams that want a genuinely open-source secrets manager often evaluate alternatives such as the OpenBao fork or Infisical.</p>
       </details>
 
       <details class="faq-item">
         <summary>How much is Vault Enterprise?</summary>
-        <p>HashiCorp does not publish a list price for Vault Enterprise. It is sold through a custom quote, typically an annual license that scales with usage and with Enterprise-only add-on modules such as namespaces, HSM and FIPS, replication, and Sentinel.</p>
+        <p>HashiCorp does not publish a list price for Vault Enterprise. It is sold through a custom quote, typically an annual license that scales with usage and with Enterprise-only modules such as namespaces, HSM and FIPS support, replication, and Sentinel. Larger deployments often carry professional-services or onboarding fees on top.</p>
       </details>
 
       <details class="faq-item">
-        <summary>What is the $72.92 fee in Vault pricing?</summary>
-        <p>$72.92 is the published HCP Vault Dedicated per-client, per-month fee on both the Essentials and Standard tiers. It is charged on top of the fixed monthly cluster fee, and it is often negotiated in larger contracts.</p>
+        <summary>What is the $72.92 fee in HashiCorp Vault pricing?</summary>
+        <p>$72.92 is the published HCP Vault Dedicated per-client, per-month fee, charged on both the Essentials and Standard tiers on top of the fixed cluster fee. A client is anything that authenticates to Vault, so the fee scales with the number of identities, and large contracts often negotiate the rate.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>What counts as a client in HCP Vault billing?</summary>
+        <p>A client is any application, service, or human user that authenticates to Vault. HCP counts a billable client once per active billing period rather than once for its lifetime, so short-lived and machine identities can be counted repeatedly and the bill grows with that activity.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>Is it cheaper to self-host Vault or use HCP Vault Dedicated?</summary>
+        <p>It depends on your scale and how you value engineering time. HCP Vault Dedicated removes the infrastructure and upgrade burden but adds per-client fees that rise with usage, while self-hosting Vault Community or Enterprise avoids per-client billing but shifts the cost to your own infrastructure and a team to handle upgrades, patching, and disaster recovery. The calculator above lets you compare both paths side by side.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>What are the hidden costs of HashiCorp Vault?</summary>
+        <p>The costs that rarely appear on a quote are engineering headcount, upgrades and patching, disaster-recovery drills, the weeks or months to reach production, and renewal increases. Because Vault is a toolkit rather than a finished product, these operational costs usually dominate the total cost of ownership.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>How many engineers does it take to run HashiCorp Vault?</summary>
+        <p>It scales with your deployment, but teams commonly dedicate around half an engineer for a small single-cluster setup, one to two for a mid-market platform, and three to five or more for a multi-region enterprise. Vault's auth methods, policies, secret engines, and upgrades are configured and maintained by hand, which usually needs a dedicated platform or security owner.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>How long does it take to deploy HashiCorp Vault to production?</summary>
+        <p>A single cluster can be running in days, but a production-grade deployment with high availability, storage, unseal, auth methods, policies, and integrations commonly takes several weeks, and multi-region or compliance-heavy setups can run three to six months. This one-time ramp is a real cost that teams often underestimate.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>Does HashiCorp Vault pricing increase at renewal?</summary>
+        <p>Often, yes. Because pricing is based on clients and features, the bill grows as your identities and requirements grow, and widely reported procurement data puts renewal increases in the range of 25 to 60 percent or more.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>Are there cheaper alternatives to HashiCorp Vault?</summary>
+        <p>Yes. Common alternatives include cloud-native services like AWS Secrets Manager and Azure Key Vault, the open-source OpenBao fork, and open-source platforms like Infisical, several of which are simpler and cheaper to operate. Infisical, which built this calculator, is an open-source secrets platform with a Postgres-based architecture and setup measured in hours, and the numbers above let you weigh the cost side for yourself.</p>
       </details>
     </div>
   </div>
@@ -732,7 +772,15 @@
       "name": "How much does HashiCorp Vault cost per month?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "For HCP Vault Dedicated, the cluster fee starts at $1,152 per month on Essentials and $1,345 per month on Standard, plus $72.92 per client, per month. Vault Enterprise is quoted privately, and Vault Community is free apart from infrastructure and staffing."
+        "text": "HCP Vault Dedicated starts at about $1,152 per month for an Essentials cluster and $1,345 per month for Standard, plus $72.92 per client, per month. Vault Enterprise is quoted privately with no public list price, and Vault Community is free to license. The subscription is usually the smaller part of the real cost once you add the engineers and infrastructure needed to run it."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the total cost of ownership of HashiCorp Vault?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The total cost of ownership combines the subscription or license, cloud infrastructure, the engineers who operate and upgrade Vault, the time it takes to reach production, and renewal increases. For most teams, staffing and operations are the largest line and often exceed the subscription itself. The calculator at the top of this page estimates the full figure from your own inputs."
       }
     },
     {
@@ -740,15 +788,15 @@
       "name": "Is HashiCorp Vault free?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Vault Community is free to license and open source. HCP Vault Dedicated and Vault Enterprise are paid. Even the free edition carries infrastructure and engineering costs to run in production."
+        "text": "Vault Community edition is free to license and can be self-hosted at no software cost, while HCP Vault Dedicated and Vault Enterprise are paid. The free edition is not free to operate, though: you still pay for highly available infrastructure and the engineering time to run, secure, and upgrade it."
       }
     },
     {
       "@type": "Question",
-      "name": "How does HCP Vault count clients for billing?",
+      "name": "Is HashiCorp Vault open source?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "A client is any application, service, or user that authenticates to Vault. HCP counts a billable client once per active billing period, so intermittent and machine identities can be counted repeatedly over time."
+        "text": "Vault is source-available rather than open source. In August 2023 HashiCorp relicensed it from the MPL 2.0 to the Business Source License (BSL 1.1), so the source is public and free to self-host for most uses, but you cannot use it to build a competing commercial offering. Teams that want a genuinely open-source secrets manager often evaluate alternatives such as the OpenBao fork or Infisical."
       }
     },
     {
@@ -756,15 +804,71 @@
       "name": "How much is Vault Enterprise?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "HashiCorp does not publish a list price for Vault Enterprise. It is sold through a custom quote, typically an annual license that scales with usage and with Enterprise-only add-on modules such as namespaces, HSM and FIPS, replication, and Sentinel."
+        "text": "HashiCorp does not publish a list price for Vault Enterprise. It is sold through a custom quote, typically an annual license that scales with usage and with Enterprise-only modules such as namespaces, HSM and FIPS support, replication, and Sentinel. Larger deployments often carry professional-services or onboarding fees on top."
       }
     },
     {
       "@type": "Question",
-      "name": "What is the $72.92 fee in Vault pricing?",
+      "name": "What is the $72.92 fee in HashiCorp Vault pricing?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "$72.92 is the published HCP Vault Dedicated per-client, per-month fee on both the Essentials and Standard tiers. It is charged on top of the fixed monthly cluster fee, and it is often negotiated in larger contracts."
+        "text": "$72.92 is the published HCP Vault Dedicated per-client, per-month fee, charged on both the Essentials and Standard tiers on top of the fixed cluster fee. A client is anything that authenticates to Vault, so the fee scales with the number of identities, and large contracts often negotiate the rate."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What counts as a client in HCP Vault billing?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A client is any application, service, or human user that authenticates to Vault. HCP counts a billable client once per active billing period rather than once for its lifetime, so short-lived and machine identities can be counted repeatedly and the bill grows with that activity."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it cheaper to self-host Vault or use HCP Vault Dedicated?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It depends on your scale and how you value engineering time. HCP Vault Dedicated removes the infrastructure and upgrade burden but adds per-client fees that rise with usage, while self-hosting Vault Community or Enterprise avoids per-client billing but shifts the cost to your own infrastructure and a team to handle upgrades, patching, and disaster recovery. The calculator above lets you compare both paths side by side."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the hidden costs of HashiCorp Vault?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The costs that rarely appear on a quote are engineering headcount, upgrades and patching, disaster-recovery drills, the weeks or months to reach production, and renewal increases. Because Vault is a toolkit rather than a finished product, these operational costs usually dominate the total cost of ownership."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many engineers does it take to run HashiCorp Vault?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It scales with your deployment, but teams commonly dedicate around half an engineer for a small single-cluster setup, one to two for a mid-market platform, and three to five or more for a multi-region enterprise. Vault's auth methods, policies, secret engines, and upgrades are configured and maintained by hand, which usually needs a dedicated platform or security owner."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long does it take to deploy HashiCorp Vault to production?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A single cluster can be running in days, but a production-grade deployment with high availability, storage, unseal, auth methods, policies, and integrations commonly takes several weeks, and multi-region or compliance-heavy setups can run three to six months. This one-time ramp is a real cost that teams often underestimate."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does HashiCorp Vault pricing increase at renewal?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Often, yes. Because pricing is based on clients and features, the bill grows as your identities and requirements grow, and widely reported procurement data puts renewal increases in the range of 25 to 60 percent or more."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Are there cheaper alternatives to HashiCorp Vault?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Common alternatives include cloud-native services like AWS Secrets Manager and Azure Key Vault, the open-source OpenBao fork, and open-source platforms like Infisical, several of which are simpler and cheaper to operate. Infisical, which built this calculator, is an open-source secrets platform with a Postgres-based architecture and setup measured in hours, and the numbers above let you weigh the cost side for yourself."
       }
     }
   ]
