@@ -90,11 +90,27 @@
   main { background: var(--bg-page); padding: 40px 0 80px; }
   .grid {
     display: grid;
-    grid-template-columns: 380px 1fr;
+    grid-template-columns: minmax(0, 1fr) 420px;
     gap: 24px;
     align-items: start;
   }
   @media (max-width: 980px) { .grid { grid-template-columns: 1fr; } }
+
+  /* results pinned beside the wide customization column */
+  .results-rail { position: sticky; top: 24px; align-self: start; }
+  @media (max-width: 980px) { .results-rail { position: static; } }
+  .below { margin-top: 24px; display: flex; flex-direction: column; gap: 24px; }
+
+  /* stepped input flow */
+  .step { border-top: 1px solid var(--border); margin-top: 26px; padding-top: 24px; }
+  .step:first-of-type { border-top: none; margin-top: 10px; padding-top: 0; }
+  .step-head { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .step-num {
+    width: 24px; height: 24px; flex: none;
+    display: flex; align-items: center; justify-content: center;
+    background: #000; color: #fff; font-family: var(--mono); font-size: 12px;
+  }
+  .step-title { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; color: var(--text); }
 
   .panel {
     background: var(--bg);
@@ -189,7 +205,7 @@
   .cat { border: 1px solid var(--border); margin-bottom: 16px; }
   .cat-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; }
   .cat-head .label { margin: 0; }
-  .cat-body { padding: 4px 16px 6px; }
+  .cat-body { padding: 4px 16px 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(238px, 1fr)); gap: 0 24px; align-items: start; }
   .cat--off { opacity: 0.6; }
   .cat--off .cat-body { display: none; }
   .cat-toggle { position: relative; width: 42px; height: 22px; flex: none; border: 1px solid var(--border); background: transparent; border-radius: 0; cursor: pointer; padding: 0; transition: background .15s var(--ease), border-color .15s var(--ease); }
@@ -389,39 +405,40 @@
       <!-- ============ INPUTS ============ -->
       <section class="panel" aria-label="Inputs">
         <h2>Calculate your cost</h2>
-        <p class="panel-note">Pick the profile closest to your team. We build the estimate from there — then customize any assumption to match your reality.</p>
+        <p class="panel-note">Start with the profile closest to your team, then fine-tune every assumption to match your reality.</p>
 
-        <div class="field">
-          <span class="label">Start here · pick a profile</span>
-          <div class="seg" id="seg-stage" role="group" aria-label="Presets">
-            <button data-stage="startup" aria-pressed="false">Startup</button>
-            <button data-stage="midmarket" aria-pressed="false">Mid-market</button>
-            <button data-stage="enterprise" aria-pressed="false">Enterprise</button>
-            <button data-stage="custom" aria-pressed="false">Custom</button>
+        <!-- STEP 1 · pick a profile -->
+        <div class="step">
+          <div class="step-head"><span class="step-num">1</span><span class="step-title">Pick a profile</span></div>
+
+          <div class="field">
+            <span class="label">Profile</span>
+            <div class="seg" id="seg-stage" role="group" aria-label="Presets">
+              <button data-stage="startup" aria-pressed="false">Startup</button>
+              <button data-stage="midmarket" aria-pressed="false">Mid-market</button>
+              <button data-stage="enterprise" aria-pressed="false">Enterprise</button>
+              <button data-stage="custom" aria-pressed="false">Custom</button>
+            </div>
+            <p class="hint" id="stage-hint"></p>
           </div>
-          <p class="hint" id="stage-hint"></p>
-        </div>
 
-        <div class="field hidden" id="field-deploy">
-          <span class="label">Which Vault</span>
-          <div class="seg" id="seg-deploy" role="group" aria-label="Deployment model">
-            <button data-deploy="hcp" aria-pressed="true">HCP Vault Dedicated</button>
-            <button data-deploy="enterprise" aria-pressed="false">Self-hosted</button>
-            <button data-deploy="community" aria-pressed="false">Community</button>
+          <div class="field hidden" id="field-deploy" style="margin-bottom:0;">
+            <span class="label">Which Vault</span>
+            <div class="seg" id="seg-deploy" role="group" aria-label="Deployment model">
+              <button data-deploy="hcp" aria-pressed="true">HCP Vault Dedicated</button>
+              <button data-deploy="enterprise" aria-pressed="false">Self-hosted</button>
+              <button data-deploy="community" aria-pressed="false">Community</button>
+            </div>
+            <p class="hint" id="deploy-hint"></p>
           </div>
-          <p class="hint" id="deploy-hint"></p>
         </div>
 
-        <!-- transparent assumptions: shown once a profile is picked -->
-        <div class="assumptions hidden" id="assumptions">
-          <span class="label">What we assume for this profile</span>
-          <ul id="assume-list"></ul>
-          <button class="customize-cta" id="customize-toggle">Customize these numbers →</button>
-        </div>
+        <!-- STEP 2 · customize (revealed once a profile is picked) -->
+        <div class="step hidden" id="customize-step">
+          <div class="step-head"><span class="step-num">2</span><span class="step-title">Customize your assumptions</span></div>
+          <p class="panel-note" style="margin:-4px 0 18px;">Every number below starts from your profile and is editable — this is where the estimate gets real. Toggle a whole category off to isolate what you want to count.</p>
 
-        <!-- advanced editable controls, hidden until "Customize" -->
-        <div id="advanced" class="hidden">
-          <p class="panel-note" style="margin:0 0 16px;">Toggle whole categories on or off to isolate what you want to count.</p>
+          <div id="advanced">
 
           <!-- ===== Vault subscription ===== -->
           <div class="cat" data-cat="subscription">
@@ -576,15 +593,13 @@
             </div>
           </div>
 
-          <div style="display:flex; gap:10px;">
-            <button class="reset" id="reset" style="flex:1;">Reset to preset</button>
-            <button class="reset" id="collapse" style="flex:1;">Done →</button>
-          </div>
-        </div>
+          <button class="reset" id="reset" style="width:100%; margin-top:8px;">Reset to preset</button>
+          </div><!-- /#advanced -->
+        </div><!-- /#customize-step -->
       </section>
 
       <!-- ============ RESULTS ============ -->
-      <section aria-label="Results" class="stack" style="gap:24px;">
+      <section aria-label="Results" class="results-rail stack" style="gap:24px;">
 
         <!-- placeholder until a profile is picked -->
         <div class="result-empty" id="result-empty">
@@ -614,7 +629,10 @@
             <table class="years" id="years-table"></table>
           </div>
         </div>
+      </section>
+    </div><!-- /.grid -->
 
+    <div class="below">
         <div class="confess">
           <div class="brand">
             <svg viewBox="0 0 91 43" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -640,9 +658,7 @@
           <p class="panel-note" style="margin-bottom:18px;">Every figure leans on HashiCorp's published pricing where it exists and clearly-flagged, conservative assumptions where it doesn't. Adjust the inputs to match your reality.</p>
           <ol id="notes-list"></ol>
         </details>
-
-      </section>
-    </div>
+    </div><!-- /.below -->
   </div>
 </main>
 
@@ -831,6 +847,7 @@ function startCalc() {
   document.getElementById('result-empty').classList.add('hidden');
   document.getElementById('result-live').classList.remove('hidden');
   document.getElementById('field-deploy').classList.remove('hidden');
+  document.getElementById('customize-step').classList.remove('hidden');
 }
 
 // Pre-start view: only the profile chooser is live; the rest waits.
@@ -994,28 +1011,8 @@ function render() {
   rows += '<tr class="total"><td>3-year total</td><td></td><td></td><td>' + fmt$(grand) + '</td></tr>';
   tbl.innerHTML = rows;
 
-  renderAssumptions();
   renderNotes();
   syncControls();
-}
-
-function renderAssumptions() {
-  const rows = [];
-  if (S.deploy === 'hcp') rows.push(['Product', 'HCP Dedicated · ' + cap(S.tier) + ' · ' + cap(S.clusterSize)]);
-  else if (S.deploy === 'enterprise') rows.push(['Product', 'Vault Enterprise · self-hosted']);
-  else rows.push(['Product', 'Vault Community · self-hosted']);
-  rows.push(['Clients', '~' + S.clients.toLocaleString()]);
-  if (S.deploy === 'hcp') rows.push(['Per-client fee', '$' + S.perClient.toFixed(2) + '/mo' + (S.periodMult > 1 ? ' ×' + S.periodMult : '')]);
-  rows.push([S.deploy === 'hcp' ? 'Clusters' : 'Clusters / envs', S.clusters]);
-  rows.push(['Engineers', trimNum(S.fte) + ' FTE @ ' + fmt$k(S.salary)]);
-  rows.push(['Upgrades & maint.', Math.round(S.maintShare * 100) + '% of eng time']);
-  rows.push(['Time to production', S.onboard === 0 ? 'instant' : trimNum(S.onboard) + ' mo']);
-  if (S.psFee > 0) rows.push(['Pro services (yr 1)', fmt$k(S.psFee)]);
-  if (S.addon > 0) rows.push(['Add-ons & support', '+' + S.addon + '% of license']);
-  rows.push(['Renewal uplift', S.uplift + '%']);
-  rows.push(['Annual growth', S.growth + '%']);
-  document.getElementById('assume-list').innerHTML =
-    rows.map(([k, v]) => '<li><span>' + k + '</span><b>' + v + '</b></li>').join('');
 }
 
 function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
@@ -1086,17 +1083,12 @@ function wire() {
   document.querySelectorAll('#seg-stage button').forEach(b =>
     b.addEventListener('click', () => {
       if (b.dataset.stage === 'custom') {
-        if (!started) applyPreset('midmarket');   // seed sensible numbers to customize from
+        if (!started) applyPreset('midmarket');   // seed sensible numbers to start from
         S.stage = 'custom';
-        startCalc();
-        document.getElementById('assumptions').classList.add('hidden');
-        document.getElementById('advanced').classList.remove('hidden');
       } else {
         applyPreset(b.dataset.stage);
-        startCalc();
-        document.getElementById('advanced').classList.add('hidden');
-        document.getElementById('assumptions').classList.remove('hidden');
       }
+      startCalc();
       render();
     }));
   document.querySelectorAll('#seg-deploy button').forEach(b =>
@@ -1134,14 +1126,6 @@ function wire() {
     t.addEventListener('click', () => { S.cat[t.dataset.cat] = !S.cat[t.dataset.cat]; markCustom(); render(); }));
 
   document.getElementById('reset').addEventListener('click', () => { applyPreset(S.preset || 'midmarket'); render(); });
-  document.getElementById('customize-toggle').addEventListener('click', () => {
-    document.getElementById('assumptions').classList.add('hidden');
-    document.getElementById('advanced').classList.remove('hidden');
-  });
-  document.getElementById('collapse').addEventListener('click', () => {
-    document.getElementById('advanced').classList.add('hidden');
-    document.getElementById('assumptions').classList.remove('hidden');
-  });
 }
 
 /* ---------------- init ---------------- */
