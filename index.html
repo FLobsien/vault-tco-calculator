@@ -5,8 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="robots" content="noindex, nofollow, noarchive, noimageindex" />
 <meta name="googlebot" content="noindex, nofollow, noarchive" />
-<meta name="description" content="How much does HashiCorp Vault cost? See HCP Vault Dedicated and Vault Enterprise pricing, the $72.92 per-client fee, what the sticker price leaves out, and a full total-cost-of-ownership calculator." />
-<title>HashiCorp Vault Pricing: HCP & Enterprise TCO Calculator</title>
+<meta name="description" content="Free HashiCorp Vault pricing calculator. Estimate real Vault cost and Vault TCO across HCP Vault Dedicated, Vault Enterprise, and Vault Community, including the $72.92 per-client fee and the operational costs a quote leaves out." />
+<title>Vault Pricing Calculator: HashiCorp Vault Cost &amp; TCO (HCP, Enterprise, Community)</title>
+<meta property="og:title" content="Vault Pricing Calculator: HashiCorp Vault Cost &amp; TCO" />
+<meta property="og:description" content="Free HashiCorp Vault pricing calculator. Estimate real Vault cost and Vault TCO across HCP Vault Dedicated, Vault Enterprise, and Vault Community." />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Vault Pricing Calculator: HashiCorp Vault Cost &amp; TCO" />
+<meta name="twitter:description" content="Free HashiCorp Vault pricing calculator. Estimate real Vault cost and Vault TCO across HCP Vault Dedicated, Vault Enterprise, and Vault Community." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
 <style>
@@ -392,9 +398,9 @@
 
 <header class="hero">
   <div class="wrap">
-    <div class="label eyebrow">Total cost of ownership · HashiCorp Vault</div>
+    <div class="label eyebrow">Vault pricing calculator · Vault TCO</div>
     <h1>What HashiCorp Vault <span class="mark">actually</span> costs</h1>
-    <p class="sub">The cluster bill is the part you can see. The real spend is the engineers who run it and the months it takes to get to production. This estimates all of it — using HashiCorp's published pricing where it exists and clearly-flagged, conservative assumptions where it doesn't.</p>
+    <p class="sub">The cluster bill is the part you can see. The real spend is the engineers who run it and the months it takes to get to production. This Vault pricing calculator estimates all of it — using HashiCorp's published pricing where it exists and clearly-flagged, conservative assumptions where it doesn't.</p>
   </div>
 </header>
 
@@ -501,7 +507,7 @@
                 <p class="hint">Prod, non-prod, and per-region replicas each multiply cost. Typical: 1 (startup) · 2–3 (mid) · 4+ (enterprise / multi-region).</p>
               </div>
 
-              <div class="field">
+              <div class="field licensed-only">
                 <div class="slider-row">
                   <span class="label">Add-on modules &amp; premium support</span>
                   <span class="slider-val" id="addon-val"></span>
@@ -555,7 +561,7 @@
                 <p class="hint">One-time ramp, charged in year 1. Typical: weeks for a single cluster · 3–6 months for multi-region / HA.</p>
               </div>
 
-              <div class="field">
+              <div class="field licensed-only">
                 <div class="slider-row">
                   <span class="label">Professional services / onboarding fee</span>
                   <span class="slider-val" id="psfee-val"></span>
@@ -582,7 +588,7 @@
                 <p class="hint">Compounds clients and team across the 3-year view. Typical: 15–30% / yr for a scaling team.</p>
               </div>
 
-              <div class="field">
+              <div class="field licensed-only">
                 <div class="slider-row">
                   <span class="label">Renewal / hidden-cost uplift</span>
                   <span class="slider-val" id="uplift-val"></span>
@@ -654,7 +660,7 @@
         </div>
 
         <details class="notes" id="notes">
-          <summary>How these numbers are built</summary>
+          <summary>How this Vault pricing calculator works</summary>
           <p class="panel-note" style="margin-bottom:18px;">Every figure leans on HashiCorp's published pricing where it exists and clearly-flagged, conservative assumptions where it doesn't. Adjust the inputs to match your reality.</p>
           <ol id="notes-list"></ol>
         </details>
@@ -665,8 +671,8 @@
 <section class="content" aria-label="HashiCorp Vault pricing explained">
   <div class="wrap">
     <h2>How much does HashiCorp Vault cost?</h2>
-    <p class="lead">HashiCorp Vault pricing depends on which Vault you run. There are three paths to production, and the price you are quoted on each is only one slice of the real total cost of ownership.</p>
-    <p>The calculator above models all three. This section breaks down the published list prices behind it, what each pricing model includes, and the operational costs that never show up on an order form.</p>
+    <p class="lead">HashiCorp Vault pricing depends on which Vault you run. There are three paths to production, and the price you are quoted on each is only one slice of the real total cost of ownership, often shortened to Vault TCO.</p>
+    <p>The Vault pricing calculator above models all three paths. This section breaks down the published list prices behind it, what each pricing model includes, and the operational costs that never show up on an order form.</p>
 
     <h3>HCP Vault Dedicated pricing</h3>
     <p>HCP Vault Dedicated is HashiCorp's single-tenant managed cloud offering. It bills two ways at once: a fixed monthly fee for the cluster, and a per-client fee for everything that authenticates to it. There are two tiers, Essentials and Standard, across three cluster sizes, with published monthly cluster fees that range from about $1,152 to $6,870 depending on tier and size. The calculator at the top of this page works from those published figures.</p>
@@ -700,8 +706,8 @@
       </details>
 
       <details class="faq-item">
-        <summary>What is the total cost of ownership of HashiCorp Vault?</summary>
-        <p>The total cost of ownership combines the subscription or license, cloud infrastructure, the engineers who operate and upgrade Vault, the time it takes to reach production, and renewal increases. For most teams, staffing and operations are the largest line and often exceed the subscription itself. The calculator at the top of this page estimates the full figure from your own inputs.</p>
+        <summary>What is Vault TCO (total cost of ownership)?</summary>
+        <p>Vault TCO, short for the total cost of ownership of HashiCorp Vault, combines the subscription or license, cloud infrastructure, the engineers who operate and upgrade Vault, the time it takes to reach production, and renewal increases. For most teams, staffing and operations are the largest line and often exceed the subscription itself. The Vault pricing calculator at the top of this page estimates the full figure from your own inputs.</p>
       </details>
 
       <details class="faq-item">
@@ -777,10 +783,10 @@
     },
     {
       "@type": "Question",
-      "name": "What is the total cost of ownership of HashiCorp Vault?",
+      "name": "What is Vault TCO (total cost of ownership)?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The total cost of ownership combines the subscription or license, cloud infrastructure, the engineers who operate and upgrade Vault, the time it takes to reach production, and renewal increases. For most teams, staffing and operations are the largest line and often exceed the subscription itself. The calculator at the top of this page estimates the full figure from your own inputs."
+        "text": "Vault TCO, short for the total cost of ownership of HashiCorp Vault, combines the subscription or license, cloud infrastructure, the engineers who operate and upgrade Vault, the time it takes to reach production, and renewal increases. For most teams, staffing and operations are the largest line and often exceed the subscription itself. The Vault pricing calculator at the top of this page estimates the full figure from your own inputs."
       }
     },
     {
@@ -1021,7 +1027,8 @@ function computeVaultYear(s, yearIndex) {
   const maint = people * s.maintShare;     // portion attributable to upgrades/patching/DR
   const ops = people - maint;              // steady-state operation
   const onboard = (cat.operational && yearIndex === 0) ? s.fte * s.salary * (s.onboard / 12) : 0;
-  const ps = (cat.operational && yearIndex === 0) ? s.psFee : 0;
+  // PS fees are a vendor-attached, paid-license cost — not applicable to the free Community edition.
+  const ps = (cat.operational && yearIndex === 0 && s.deploy !== 'community') ? s.psFee : 0;
 
   // Growth & renewal: renewal uplift on the licensed spend.
   const uplift = cat.growth ? license * (s.uplift / 100) : 0;
@@ -1081,6 +1088,8 @@ function scrambleNumber() {
 function render() {
   // sync visibility
   document.querySelectorAll('.hcp-only').forEach(el => el.classList.toggle('hidden', S.deploy !== 'hcp'));
+  // Add-ons, PS fees, and renewal uplift all assume a paid license — Community has none of those.
+  document.querySelectorAll('.licensed-only').forEach(el => el.classList.toggle('hidden', S.deploy === 'community'));
   const sh = { startup: 'Early team, a handful of services, a single environment.',
                midmarket: 'Several teams and environments, a growing platform footprint.',
                enterprise: 'Many teams, multiple regions, strict uptime and compliance needs.',
