@@ -227,7 +227,7 @@
   /* ---------- Results ---------- */
   .result-top {
     background: var(--bg-dark); color: var(--text-on-dark);
-    border: 1px solid var(--border-dark); padding: 36px;
+    border: 1px solid var(--border-dark); padding: 28px;
   }
   .bignum { font-family: var(--mono); font-weight: 600; line-height: 1; }
   .result-top .label { color: var(--text-on-dark-subtle); margin-bottom: 12px; }
@@ -240,7 +240,7 @@
   /* result placeholder — shown until the user picks a profile */
   .result-empty {
     background: var(--bg); border: 1px dashed var(--border);
-    padding: 48px 36px;
+    padding: 28px;
   }
   .result-empty > .label { display: block; margin-bottom: 14px; }
   .result-empty .empty-num {
@@ -265,9 +265,10 @@
   .legend-item .li-pct { font-family: var(--mono); font-size: 11px; color: var(--text-subtle); }
   .src-tag { font-family: var(--mono); font-size: 10px; letter-spacing: .03em; padding: 1px 4px; border: 1px solid var(--border); color: var(--text-subtle); }
   .src-tag.estimated { border-style: dashed; }
+  .src-tag.ballpark { border-style: dotted; }
 
   /* info "i" + tooltip (adapted from design system .tip) */
-  .tip { position: relative; display: inline-flex; align-items: center; }
+  .tip { position: relative; display: inline-flex; align-items: center; text-transform: none; letter-spacing: normal; font-weight: 400; }
   .info {
     display: inline-flex; align-items: center; justify-content: center;
     width: 15px; height: 15px; margin-left: 6px;
@@ -298,10 +299,6 @@
   table.years td:first-child, table.years th:first-child { text-align: left; font-family: var(--font); }
   table.years tr.total td { font-weight: 600; border-bottom: none; border-top: 1px solid #000; }
 
-  .callout {
-    border-left: 2px solid var(--volt); padding: 4px 0 4px 18px; margin-top: 24px;
-    font-size: 15px; color: var(--text);
-  }
 
   /* Infisical confession card */
   .confess {
@@ -318,6 +315,12 @@
     letter-spacing: -0.03em; max-width: 22ch; margin-bottom: 18px;
   }
   .confess p { font-size: 16px; color: var(--text-on-dark); max-width: 64ch; margin-bottom: 14px; }
+  .confess ul { list-style: none; margin: 4px 0 18px; }
+  .confess ul li {
+    position: relative; padding-left: 20px; margin-bottom: 10px;
+    font-size: 15px; color: var(--text-on-dark); max-width: 64ch;
+  }
+  .confess ul li::before { content: ""; position: absolute; left: 0; top: 8px; width: 7px; height: 7px; background: var(--volt); }
   .confess .cta {
     display: inline-block; margin-top: 12px;
     background: var(--volt); color: #000; border: 1px solid var(--volt);
@@ -385,13 +388,39 @@
 
   footer.foot { background: var(--bg-dark); color: var(--text-on-dark-subtle); padding: 28px 0; font-size: 12px; }
   footer.foot a { color: var(--text-on-dark); }
+
+  /* ---------- Mobile ---------- */
+  @media (max-width: 640px) {
+    .wrap { padding: 0 20px; }
+    .topbar .wrap { padding: 10px 20px; }
+    header.hero { padding: 44px 0 36px; }
+    main { padding: 28px 0 56px; }
+    .panel, .result-empty, .result-top, .confess { padding: 20px; }
+    .assumptions { padding: 14px; }
+    .cat-body { padding: 4px 14px 10px; grid-template-columns: 1fr; }
+    .cat-head { padding: 12px 14px; }
+
+    /* segmented controls: long labels ("HCP Vault Dedicated") no longer fit
+       flex:1 columns at phone widths — wrap onto two lines instead of clipping */
+    .seg button {
+      font-size: 12px;
+      white-space: normal;
+      line-height: 1.25;
+      padding: 8px 6px;
+    }
+
+    .legend { grid-template-columns: 1fr; }
+    table.years th, table.years td { padding: 8px 6px; font-size: 12px; }
+    .confess .brand svg { width: 28px; }
+    .confess h2 { font-size: clamp(22px, 6vw, 28px); }
+  }
 </style>
 </head>
 <body>
 
 <div class="topbar">
   <div class="wrap">
-    <p>Comparing HashiCorp Vault and Infisical? Get a side-by-side cost and migration read from someone who has done it.</p>
+    <p>Looking into HashiCorp Vault? Check out Infisical for a simpler alternative with better developer experience, less maintenance, and faster onboarding.</p>
     <a class="tb-cta" href="https://infisical.com/talk-to-us?utm_source=tco-calculator&utm_medium=microapp&utm_campaign=vault-tco" target="_blank" rel="noopener">Talk to an expert →</a>
   </div>
 </div>
@@ -400,7 +429,7 @@
   <div class="wrap">
     <div class="label eyebrow">Vault pricing calculator · Vault TCO</div>
     <h1>What HashiCorp Vault <span class="mark">actually</span> costs</h1>
-    <p class="sub">The cluster bill is the part you can see. The real spend is the engineers who run it and the months it takes to get to production. This Vault pricing calculator estimates all of it — using HashiCorp's published pricing where it exists and clearly-flagged, conservative assumptions where it doesn't.</p>
+    <p class="sub">HashiCorp Vault is a powerful tool for secrets management, but its complexity makes it much more expensive than the invoices suggest. The real cost is engineers who run it and long onboarding. This Vault pricing calculator estimates all of it, based on official pricing and informed estimates.</p>
   </div>
 </header>
 
@@ -411,7 +440,7 @@
       <!-- ============ INPUTS ============ -->
       <section class="panel" aria-label="Inputs">
         <h2>Calculate your cost</h2>
-        <p class="panel-note">Start with the profile closest to your team, then fine-tune every assumption to match your reality.</p>
+        <p class="panel-note">Choose the closest profile match, then fine-tune every assumption to match your reality.</p>
 
         <!-- STEP 1 · pick a profile -->
         <div class="step">
@@ -429,7 +458,7 @@
           </div>
 
           <div class="field hidden" id="field-deploy" style="margin-bottom:0;">
-            <span class="label">Which Vault</span>
+            <span class="label">Which Vault product?</span>
             <div class="seg" id="seg-deploy" role="group" aria-label="Deployment model">
               <button data-deploy="hcp" aria-pressed="true">HCP Vault Dedicated</button>
               <button data-deploy="enterprise" aria-pressed="false">Self-hosted</button>
@@ -441,15 +470,15 @@
 
         <!-- STEP 2 · customize (revealed once a profile is picked) -->
         <div class="step hidden" id="customize-step">
-          <div class="step-head"><span class="step-num">2</span><span class="step-title">Customize your assumptions</span></div>
-          <p class="panel-note" style="margin:-4px 0 18px;">Every number below starts from your profile and is fully editable. This is where the estimate gets real. Toggle a whole category off to isolate what you want to count.</p>
+          <div class="step-head"><span class="step-num">2</span><span class="step-title">Customize assumptions</span></div>
+          <p class="panel-note" style="margin:-4px 0 18px;">Estimate pricing based on your deployment details. Toggle categories to isolate factors.</p>
 
           <div id="advanced">
 
           <!-- ===== Vault subscription ===== -->
           <div class="cat" data-cat="subscription">
             <div class="cat-head">
-              <span class="label">Vault subscription</span>
+              <span class="label">Vault subscription<span class="tip" tabindex="0"><span class="info">i</span><span class="tip__bubble">The cluster or license itself: HCP fees, per-client billing, and cluster count — or just infrastructure if you're on the free Community edition. Line items that show up on an invoice, billed monthly or annually.</span></span></span>
               <button type="button" class="cat-toggle" data-cat="subscription" aria-pressed="true" aria-label="Toggle Vault subscription costs"></button>
             </div>
             <div class="cat-body">
@@ -486,7 +515,7 @@
                 </div>
                 <label class="mini-check"><input type="checkbox" id="custom-quote" /> <span>Custom quote / contract?</span></label>
                 <input type="number" id="perclient-input" class="num-input hidden" min="0" step="0.01" aria-label="Custom per-client monthly rate" />
-                <p class="hint">HCP list price is <strong>$72.92</strong> per client / month. Toggle on to enter a negotiated or Enterprise rate (often higher).</p>
+                <p class="hint">HCP list price is <strong>$72.92</strong> per client/month. Toggle on to enter a negotiated or Enterprise rate.</p>
               </div>
 
               <div class="field hcp-only">
@@ -504,24 +533,16 @@
                   <span class="slider-val" id="clusters-val"></span>
                 </div>
                 <input type="range" id="clusters" min="1" max="12" step="1" />
-                <p class="hint">Prod, non-prod, and per-region replicas each multiply cost. Typical: 1 (startup) · 2–3 (mid) · 4+ (enterprise / multi-region).</p>
+                <p class="hint">Prod, non-prod, and per-region replicas.</p>
               </div>
 
-              <div class="field licensed-only">
-                <div class="slider-row">
-                  <span class="label">Add-on modules &amp; premium support</span>
-                  <span class="slider-val" id="addon-val"></span>
-                </div>
-                <input type="range" id="addon" min="0" max="60" step="5" />
-                <p class="hint">% on top of license. Namespaces, HSM/FIPS, DR &amp; replication, Sentinel, and KMIP require Vault Enterprise; paid support tiers add more.</p>
-              </div>
             </div>
           </div>
 
           <!-- ===== Operational overhead ===== -->
           <div class="cat" data-cat="operational">
             <div class="cat-head">
-              <span class="label">Operational overhead</span>
+              <span class="label">Operational overhead<span class="tip" tabindex="0"><span class="info">i</span><span class="tip__bubble">The resources it takes to run Vault: dedicated engineers, time spent on upgrades and DR, and the one-time ramp to production.</span></span></span>
               <button type="button" class="cat-toggle" data-cat="operational" aria-pressed="true" aria-label="Toggle operational overhead"></button>
             </div>
             <div class="cat-body">
@@ -549,7 +570,7 @@
                   <span class="slider-val" id="maintshare-val"></span>
                 </div>
                 <input type="range" id="maintshare" min="0" max="80" step="5" />
-                <p class="hint">Share of engineering time on upgrades, patching, and DR — the most-cited Vault burden. Typical: 30–50% for self-managed.</p>
+                <p class="hint">Share of engineering time on upgrades, patching, and DR.</p>
               </div>
 
               <div class="field">
@@ -558,7 +579,7 @@
                   <span class="slider-val" id="onboard-val"></span>
                 </div>
                 <input type="range" id="onboard" min="0" max="12" step="0.5" />
-                <p class="hint">One-time ramp, charged in year 1. Typical: weeks for a single cluster · 3–6 months for multi-region / HA.</p>
+                <p class="hint">One-time ramp. Typical: weeks for a single cluster, 3–6 months for multi-region / HA.</p>
               </div>
 
               <div class="field licensed-only">
@@ -567,7 +588,7 @@
                   <span class="slider-val" id="psfee-val"></span>
                 </div>
                 <input type="range" id="psfee" min="0" max="100000" step="5000" />
-                <p class="hint">One-time, charged in year 1. Vendors commonly attach these to enterprise deployments.</p>
+                <p class="hint">One-time, charged in year 1. Sometimes attached to enterprise deployments.</p>
               </div>
             </div>
           </div>
@@ -575,8 +596,8 @@
           <!-- ===== Growth & renewal ===== -->
           <div class="cat" data-cat="growth">
             <div class="cat-head">
-              <span class="label">Growth &amp; renewal</span>
-              <button type="button" class="cat-toggle" data-cat="growth" aria-pressed="true" aria-label="Toggle growth and renewal"></button>
+              <span class="label">Growth<span class="tip" tabindex="0"><span class="info">i</span><span class="tip__bubble">Projects the estimate across 3 years. Annual growth <b>compounds</b> both your client count and team size year over year — an indirect effect that flows through the subscription and headcount lines above.</span></span></span>
+              <button type="button" class="cat-toggle" data-cat="growth" aria-pressed="true" aria-label="Toggle growth"></button>
             </div>
             <div class="cat-body">
               <div class="field">
@@ -586,15 +607,6 @@
                 </div>
                 <input type="range" id="growth" min="0" max="60" step="5" />
                 <p class="hint">Compounds clients and team across the 3-year view. Typical: 15–30% / yr for a scaling team.</p>
-              </div>
-
-              <div class="field licensed-only">
-                <div class="slider-row">
-                  <span class="label">Renewal / hidden-cost uplift</span>
-                  <span class="slider-val" id="uplift-val"></span>
-                </div>
-                <input type="range" id="uplift" min="0" max="120" step="5" />
-                <p class="hint">Procurement data shows 25–60% at renewal — and real cases run higher. Default is the floor.</p>
               </div>
             </div>
           </div>
@@ -611,7 +623,7 @@
         <div class="result-empty" id="result-empty">
           <span class="label">Your estimate</span>
           <div class="empty-num">$—<span class="yr"> / yr</span></div>
-          <p>Pick the profile closest to your team on the left. We build your full Vault cost breakdown from there: subscription, engineers, upgrades, onboarding and renewal.</p>
+          <p>Pick the profile closest to your scenario on the left, then customize.</p>
         </div>
 
         <div id="result-live" class="hidden">
@@ -622,11 +634,9 @@
           </div>
 
           <div class="panel">
-            <h2>Where the money goes</h2>
-            <p class="panel-note">Year 1, by cost category. The line item you were quoted is rarely the largest.</p>
+            <h2>What you pay for</h2>
             <div class="bar-track" id="bar-track"></div>
             <div class="legend" id="legend"></div>
-            <div class="callout" id="callout"></div>
           </div>
 
           <div class="panel">
@@ -654,14 +664,19 @@
           </div>
           <div class="label">A confession</div>
           <h2>We make a secrets manager too.</h2>
-          <p>We built this to be fair: every figure leans on HashiCorp's own published pricing, every assumption is conservative and labelled, and you can change all of them. But full disclosure: we're Infisical, we make an open-source secrets platform, and to the surprise of absolutely no one, we think you should look at it too.</p>
-          <p>Many of the teams who run these numbers are evaluating Vault and Infisical side by side. A lot of them choose us, for the open-source core, the Postgres-based architecture (no Raft to certify), and setup measured in hours rather than the months above. We'll let you judge the cost side yourself.</p>
+          <p>We're not exactly neutral here, but wanted to be realistic. Numbers lean on HashiCorp's published pricing where possible, and we estimate where no official numbers exist. Vault is a robust product, but we think you should also look into Infisical. We offer a simpler-to-use solution without compromising on advanced features:</p>
+          <ul>
+            <li>We build on PostgreSQL instead of Raft, which makes it easier to operate.</li>
+            <li>A user-friendly UI, automated rotations, dynamic secrets, and access policies/workflows ship out of the box with no custom coding.</li>
+            <li>Infisical is open source, so you can use us on any infrastructure, including multi-cloud, hybrid, and self-hosted infrastructure.</li>
+          </ul>
+          <p>Many of our customers evaluated Vault alongside Infisical or migrated from Vault for simpler operations, much faster setup, and lower operational overhead. You may have good reasons to evaluate Vault, but you should also check out Infisical.</p>
           <a class="cta" href="https://infisical.com/?utm_source=tco-calculator&utm_medium=microapp&utm_campaign=vault-tco" target="_blank" rel="noopener">See what Infisical does →</a>
         </div>
 
         <details class="notes" id="notes">
           <summary>How this Vault pricing calculator works</summary>
-          <p class="panel-note" style="margin-bottom:18px;">Every figure leans on HashiCorp's published pricing where it exists and clearly-flagged, conservative assumptions where it doesn't. Adjust the inputs to match your reality.</p>
+          <p class="panel-note" style="margin-bottom:18px;">Every figure leans on HashiCorp's published pricing where it exists and flagged, conservative assumptions where it doesn't. Adjust the inputs to match your reality.</p>
           <ol id="notes-list"></ol>
         </details>
     </div><!-- /.below -->
@@ -671,11 +686,11 @@
 <section class="content" aria-label="HashiCorp Vault pricing explained">
   <div class="wrap">
     <h2>How much does HashiCorp Vault cost?</h2>
-    <p class="lead">HashiCorp Vault pricing depends on which Vault you run. There are three paths to production, and the price you are quoted on each is only one slice of the real total cost of ownership, often shortened to Vault TCO.</p>
-    <p>The Vault pricing calculator above models all three paths. This section breaks down the published list prices behind it, what each pricing model includes, and the operational costs that never show up on an order form.</p>
+    <p class="lead">HashiCorp Vault pricing depends on which product you choose. There are three paths to production, and the price you are quoted on each is only one slice of the real total cost of ownership.</p>
+    <p>The Vault pricing estimator above models all three paths and allows you to customize for your specific scenario. This section breaks down the published list prices behind it, what each pricing model includes, and the operational costs that never show up on an order form.</p>
 
     <h3>HCP Vault Dedicated pricing</h3>
-    <p>HCP Vault Dedicated is HashiCorp's single-tenant managed cloud offering. It bills two ways at once: a fixed monthly fee for the cluster, and a per-client fee for everything that authenticates to it. There are two tiers, Essentials and Standard, across three cluster sizes, with published monthly cluster fees that range from about $1,152 to $6,870 depending on tier and size. The calculator at the top of this page works from those published figures.</p>
+    <p>HCP Vault Dedicated is HashiCorp's single-tenant managed cloud offering. It bills in two main ways: a fixed monthly fee for the cluster, and a per-client fee for everything that authenticates to it. There are two tiers, Essentials and Standard, across three cluster sizes, with published monthly cluster fees that range from about $1,152 to $6,870 depending on tier and size. The calculator at the top of this page works from those published figures.</p>
     <p>On top of the cluster fee, HCP Vault Dedicated charges <strong>$72.92 per client, per month</strong> on both tiers. A client is anything that authenticates to Vault: an application, a service, or a user. HashiCorp counts a billable client once per active billing period rather than once for its lifetime, so machine and short-lived identities can add up quickly. Cluster and per-client figures come from <a href="https://www.ibm.com/products/hashicorp/pricing" target="_blank" rel="noopener">IBM's published HashiCorp Vault pricing</a>, and the <a href="https://developer.hashicorp.com/vault/docs/concepts/billing/clients/counting" target="_blank" rel="noopener">client counting documentation</a> explains the billing-period rule.</p>
 
     <h3>Vault Enterprise pricing (self-hosted)</h3>
@@ -693,7 +708,7 @@
       <li><strong>Engineers.</strong> Vault is a toolkit, not a finished product. Auth methods, policies, and secret engines are configured and run by hand, which usually needs a dedicated platform or SRE owner.</li>
       <li><strong>Upgrades, patching, and disaster recovery.</strong> Vault's Raft storage means rolling upgrades and DR drills have to be planned and tested. This day-two work is the cost teams most often underestimate.</li>
       <li><strong>Time to production.</strong> Standing Vault up with a highly available topology, storage, unseal, auth methods, and integrations commonly takes weeks to months before the first secret is served.</li>
-      <li><strong>Renewal uplift.</strong> Per-client and feature-based pricing means the bill grows as identities and requirements grow. Reported procurement data puts renewal increases at 25 to 60 percent or more.</li>
+      <li><strong>Renewal and ancillary fees.</strong> Per-client and feature-based pricing means the bill grows as identities and requirements grow, and support-tier upgrades or professional-services fees are commonly layered onto the initial quote. Users have also <a href="https://www.reddit.com/r/hashicorp/comments/12jtyzq/enterprise_price_increases_for_vault_renewal/" target="_blank" rel="noopener">reported</a> price increases at contract renewal.</li>
     </ul>
     <p>Use the calculator at the top of this page to put your own numbers against each of these.</p>
 
@@ -707,7 +722,7 @@
 
       <details class="faq-item">
         <summary>What is Vault TCO (total cost of ownership)?</summary>
-        <p>Vault TCO, short for the total cost of ownership of HashiCorp Vault, combines the subscription or license, cloud infrastructure, the engineers who operate and upgrade Vault, the time it takes to reach production, and renewal increases. For most teams, staffing and operations are the largest line and often exceed the subscription itself. The Vault pricing calculator at the top of this page estimates the full figure from your own inputs.</p>
+        <p>Vault TCO, short for the total cost of ownership of HashiCorp Vault, combines the subscription or license, cloud infrastructure, the engineers who operate and upgrade Vault, the time it takes to reach production, and renewal increases. For most teams, staffing and operations are a large, indirect cost, which can even exceed the subscription itself. The Vault pricing calculator at the top of this page estimates the full figure from your own inputs.</p>
       </details>
 
       <details class="faq-item">
@@ -717,7 +732,7 @@
 
       <details class="faq-item">
         <summary>Is HashiCorp Vault open source?</summary>
-        <p>Vault is source-available rather than open source. In August 2023 HashiCorp relicensed it from the MPL 2.0 to the Business Source License (BSL 1.1), so the source is public and free to self-host for most uses, but you cannot use it to build a competing commercial offering. Teams that want a genuinely open-source secrets manager often evaluate alternatives such as the OpenBao fork or Infisical.</p>
+        <p>Vault is source-available rather than open source. In August 2023 HashiCorp relicensed it from the MPL 2.0 to the Business Source License (BSL 1.1), so the source is public and free to self-host for most uses, but you cannot use it to build a competing commercial offering. Teams that want a genuinely open-source secrets manager often evaluate alternatives such as Infisical.</p>
       </details>
 
       <details class="faq-item">
@@ -757,12 +772,12 @@
 
       <details class="faq-item">
         <summary>Does HashiCorp Vault pricing increase at renewal?</summary>
-        <p>Often, yes. Because pricing is based on clients and features, the bill grows as your identities and requirements grow, and widely reported procurement data puts renewal increases in the range of 25 to 60 percent or more.</p>
+        <p>Because pricing is based on clients and features, the bill grows as your identities and requirements grow, and users have <a href="https://www.reddit.com/r/hashicorp/comments/12jtyzq/enterprise_price_increases_for_vault_renewal/" target="_blank" rel="noopener">reported</a> price increases at contract renewal. Separately, procurement data from Vendr shows support-tier upgrades and professional-services fees commonly add 25 to 60 percent on top of the initial quote.</p>
       </details>
 
       <details class="faq-item">
-        <summary>Are there cheaper alternatives to HashiCorp Vault?</summary>
-        <p>Yes. Common alternatives include cloud-native services like AWS Secrets Manager and Azure Key Vault, the open-source OpenBao fork, and open-source platforms like Infisical, several of which are simpler and cheaper to operate. Infisical, which built this calculator, is an open-source secrets platform with a Postgres-based architecture and setup measured in hours, and the numbers above let you weigh the cost side for yourself.</p>
+        <summary>Are there alternatives to HashiCorp Vault that don't compromise on features?</summary>
+        <p>Yes. Infisical is a secrets management platform that also offers privileged access and certificate management. It has most of what Vault offers, but is much simpler to operate. Most features ship out of the box (no custom logic) and you can host it on any infrastructure.</p>
       </details>
     </div>
   </div>
@@ -786,7 +801,7 @@
       "name": "What is Vault TCO (total cost of ownership)?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Vault TCO, short for the total cost of ownership of HashiCorp Vault, combines the subscription or license, cloud infrastructure, the engineers who operate and upgrade Vault, the time it takes to reach production, and renewal increases. For most teams, staffing and operations are the largest line and often exceed the subscription itself. The Vault pricing calculator at the top of this page estimates the full figure from your own inputs."
+        "text": "Vault TCO, short for the total cost of ownership of HashiCorp Vault, combines the subscription or license, cloud infrastructure, the engineers who operate and upgrade Vault, the time it takes to reach production, and renewal increases. For most teams, staffing and operations are a large, indirect cost, which can even exceed the subscription itself. The Vault pricing calculator at the top of this page estimates the full figure from your own inputs."
       }
     },
     {
@@ -802,7 +817,7 @@
       "name": "Is HashiCorp Vault open source?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Vault is source-available rather than open source. In August 2023 HashiCorp relicensed it from the MPL 2.0 to the Business Source License (BSL 1.1), so the source is public and free to self-host for most uses, but you cannot use it to build a competing commercial offering. Teams that want a genuinely open-source secrets manager often evaluate alternatives such as the OpenBao fork or Infisical."
+        "text": "Vault is source-available rather than open source. In August 2023 HashiCorp relicensed it from the MPL 2.0 to the Business Source License (BSL 1.1), so the source is public and free to self-host for most uses, but you cannot use it to build a competing commercial offering. Teams that want a genuinely open-source secrets manager often evaluate alternatives such as Infisical."
       }
     },
     {
@@ -866,15 +881,15 @@
       "name": "Does HashiCorp Vault pricing increase at renewal?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Often, yes. Because pricing is based on clients and features, the bill grows as your identities and requirements grow, and widely reported procurement data puts renewal increases in the range of 25 to 60 percent or more."
+        "text": "Because pricing is based on clients and features, the bill grows as your identities and requirements grow, and users have reported price increases at contract renewal. Separately, procurement data from Vendr shows support-tier upgrades and professional-services fees commonly add 25 to 60 percent on top of the initial quote."
       }
     },
     {
       "@type": "Question",
-      "name": "Are there cheaper alternatives to HashiCorp Vault?",
+      "name": "Are there alternatives to HashiCorp Vault that don't compromise on features?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. Common alternatives include cloud-native services like AWS Secrets Manager and Azure Key Vault, the open-source OpenBao fork, and open-source platforms like Infisical, several of which are simpler and cheaper to operate. Infisical, which built this calculator, is an open-source secrets platform with a Postgres-based architecture and setup measured in hours, and the numbers above let you weigh the cost side for yourself."
+        "text": "Yes. Infisical is a secrets management platform that also offers privileged access and certificate management. It has most of what Vault offers, but is much simpler to operate. Most features ship out of the box (no custom logic) and you can host it on any infrastructure."
       }
     }
   ]
@@ -910,14 +925,13 @@ const MODEL = {
 
   // --- Stage presets ---
   presets: {
-    startup:    { clients: 25,  clusters: 1, fte: 0.5, onboard: 1.5, clusterSize: 'small',  psFee: 0,     addon: 0  },
-    midmarket:  { clients: 150, clusters: 2, fte: 2,   onboard: 3,   clusterSize: 'medium', psFee: 15000, addon: 0  },
-    enterprise: { clients: 800, clusters: 4, fte: 4,   onboard: 6,   clusterSize: 'large',  psFee: 35000, addon: 15 },
+    startup:    { clients: 25,  clusters: 1, fte: 0.5, onboard: 1.5, clusterSize: 'small',  psFee: 0     },
+    midmarket:  { clients: 150, clusters: 2, fte: 2,   onboard: 3,   clusterSize: 'medium', psFee: 15000 },
+    enterprise: { clients: 800, clusters: 4, fte: 4,   onboard: 6,   clusterSize: 'large',  psFee: 35000 },
   },
 
   // --- Shared defaults ---
   salaryDefault: 210000,
-  upliftDefault: 25,                // conservative floor; real renewals reach 60%+
   growthDefault: 20,
   periodMultiplier: 1,              // HCP can count clients per active period; 1 = unique
   maintShareDefault: 0.4,           // share of eng time consumed by upgrades/patching/DR
@@ -928,22 +942,18 @@ const COLORS = {
   infra:     '#737373',
   people:    '#F7FE62',   // engineers — operations (volt)
   maint:     '#56a600',   // upgrades, patching & DR
-  addons:    '#23776a',   // enterprise add-on modules & premium support
   onboard:   '#c9d63f',   // onboarding (0→1)
   ps:        '#8a8a8a',   // professional services
-  uplift:    '#c3c3c3',   // renewal / hidden uplift
 };
 
 // Defensible, Vault-specific explanations for each cost driver.
 const TOOLTIPS = {
-  license:  'HCP Vault Dedicated bills a fixed cluster fee plus a fee for <b>every client</b> that authenticates. Per HashiCorp\'s docs a client is counted once per active billing period, so machine and intermittent identities still add up. <a href="https://developer.hashicorp.com/vault/docs/concepts/billing/clients/counting" target="_blank" rel="noopener">How clients are counted →</a>',
-  infra:    'Self-managed Vault runs as a <b>highly available cluster</b> (3+ nodes on integrated Raft storage) plus load balancer, storage and backups — all billed on your own cloud account, separate from any license.',
-  people:   'Vault is an unopinionated toolkit, not a finished product. Auth methods, policies, secret engines and access reviews are configured and run by hand — work that usually needs a dedicated platform or SRE owner.',
-  maint:    'Vault upgrades follow a strict version path, and its <b>Raft</b> storage means rolling upgrades and disaster-recovery drills must be planned and tested. This day-2 load is the cost teams most often underestimate.',
-  addons:   '<b>Namespaces, HSM/FIPS, performance &amp; DR replication, Sentinel and KMIP are Enterprise-only.</b> Needing any one of them moves you off the cheaper tiers onto Enterprise licensing. <a href="https://developer.hashicorp.com/vault/tutorials/get-started/available-editions" target="_blank" rel="noopener">Vault editions →</a>',
-  onboard:  'Standing Vault up for production — HA topology, storage, unseal, auth methods, policies and integrations — commonly takes weeks to months of engineering before the first secret is served.',
+  license:  'HCP Vault Dedicated bills a fixed cluster fee plus a fee for <b>every client</b> that authenticates. A client is counted once per active billing period. <a href="https://developer.hashicorp.com/vault/docs/concepts/billing/clients/counting" target="_blank" rel="noopener">How clients are counted →</a>',
+  infra:    'Self-hosted Vault runs as a <b>highly available cluster</b> on your own infrastructure.',
+  people:   'Vault is a toolkit, not a finished product. Many workflows and policies require manual work that usually needs a dedicated platform or SRE owner.',
+  maint:    'Vault upgrades follow a strict version path, and upgrades can take real work.',
+  onboard:  'Standing Vault up for production commonly takes weeks to months of engineering before the first secret is served.',
   ps:       'Enterprise Vault agreements frequently include onboarding or implementation fees, or paid professional services, charged once up front.',
-  uplift:   'Per-client and feature-based pricing means the bill grows as identities and requirements do. Widely reported procurement data puts renewal increases at <b>25–60% or more</b>.',
 };
 
 /* ---------------- state ---------------- */
@@ -979,14 +989,12 @@ function applyPreset(stage) {
     fte: p.fte,
     salary: MODEL.salaryDefault,
     onboard: p.onboard,
-    uplift: MODEL.upliftDefault,
     growth: MODEL.growthDefault,
     perClient: MODEL.perClientMonth,
     customQuote: false,   // false = use HCP list price ($72.92)
     periodMult: MODEL.periodMultiplier,
     maintShare: MODEL.maintShareDefault,
     psFee: p.psFee,
-    addon: p.addon,
     cat: { subscription: true, operational: true, growth: true },
   };
 }
@@ -1017,10 +1025,9 @@ function computeVaultYear(s, yearIndex) {
   const clients = Math.round(s.clients * g);
   const fte = s.fte * g;
 
-  // Vault subscription: license + infra + add-on modules.
+  // Vault subscription: license + infra.
   let { license, infra } = vaultLicenseAnnual(s, clients);
   if (!cat.subscription) { license = 0; infra = 0; }
-  const addons = cat.subscription ? license * (s.addon / 100) : 0;
 
   // Operational overhead: people + ramp + professional services.
   const people = cat.operational ? fte * s.salary : 0;
@@ -1030,11 +1037,8 @@ function computeVaultYear(s, yearIndex) {
   // PS fees are a vendor-attached, paid-license cost — not applicable to the free Community edition.
   const ps = (cat.operational && yearIndex === 0 && s.deploy !== 'community') ? s.psFee : 0;
 
-  // Growth & renewal: renewal uplift on the licensed spend.
-  const uplift = cat.growth ? license * (s.uplift / 100) : 0;
-
-  const total = license + infra + addons + people + uplift + onboard + ps;
-  return { clients, fte, license, infra, people, ops, maint, addons, uplift, onboard, ps, total };
+  const total = license + infra + people + onboard + ps;
+  return { clients, fte, license, infra, people, ops, maint, onboard, ps, total };
 }
 
 /* ---------------- format ---------------- */
@@ -1088,15 +1092,15 @@ function scrambleNumber() {
 function render() {
   // sync visibility
   document.querySelectorAll('.hcp-only').forEach(el => el.classList.toggle('hidden', S.deploy !== 'hcp'));
-  // Add-ons, PS fees, and renewal uplift all assume a paid license — Community has none of those.
+  // PS fees assume a paid license — Community has none of those.
   document.querySelectorAll('.licensed-only').forEach(el => el.classList.toggle('hidden', S.deploy === 'community'));
   const sh = { startup: 'Early team, a handful of services, a single environment.',
                midmarket: 'Several teams and environments, a growing platform footprint.',
                enterprise: 'Many teams, multiple regions, strict uptime and compliance needs.',
                custom: 'Your own numbers — every assumption below is editable.' };
   document.getElementById('stage-hint').textContent = sh[S.stage];
-  const dh = { hcp: 'Single-tenant managed cloud. You pay for the cluster plus a per-client fee.',
-               enterprise: 'The same Vault binary on your own infrastructure. License is not public — we estimate it.',
+  const dh = { hcp: 'Single-tenant managed cloud with charges for the cluster plus a per-client fee.',
+               enterprise: 'Vault on your own infrastructure. Fees are estimated.',
                community: 'Free license. You still pay for infrastructure and the team that runs it.' };
   document.getElementById('deploy-hint').textContent = dh[S.deploy];
   document.getElementById('clusters-label').textContent = S.deploy === 'hcp' ? 'Clusters' : 'Clusters / environments';
@@ -1110,14 +1114,12 @@ function render() {
 
   // breakdown
   const segs = [
-    { key: 'license', label: S.deploy === 'community' ? 'License (free)' : 'License / subscription', val: y1.license, src: S.deploy === 'hcp' ? 'sourced' : 'estimated' },
+    { key: 'license', label: S.deploy === 'community' ? 'License (free)' : 'License / subscription', val: y1.license, src: S.deploy === 'hcp' ? 'sourced' : (S.deploy === 'enterprise' ? 'ballpark' : 'estimated') },
     { key: 'infra',   label: 'Infrastructure', val: y1.infra, src: 'estimated' },
     { key: 'people',  label: 'Engineers — operations', val: y1.ops, src: 'estimated' },
     { key: 'maint',   label: 'Upgrades, patching & DR', val: y1.maint, src: 'estimated' },
-    { key: 'addons',  label: 'Add-on modules &amp; premium support', val: y1.addons, src: 'estimated' },
     { key: 'onboard', label: 'Onboarding (0→1, yr 1)', val: y1.onboard, src: 'estimated' },
     { key: 'ps',      label: 'Professional services (yr 1)', val: y1.ps, src: 'estimated' },
-    { key: 'uplift',  label: 'Renewal / hidden uplift', val: y1.uplift, src: 'sourced' },
   ].filter(s => s.val > 0);
 
   const bar = document.getElementById('bar-track');
@@ -1137,22 +1139,10 @@ function render() {
     li.className = 'legend-item';
     li.innerHTML =
       '<span class="swatch" style="background:' + COLORS[s.key] + '"></span>' +
-      '<span class="li-label">' + s.label + ' <span class="src-tag ' + (s.src === 'estimated' ? 'estimated' : '') + '">' + s.src + '</span>' + tip + '</span>' +
+      '<span class="li-label">' + s.label + ' <span class="src-tag ' + s.src + '">' + s.src + '</span>' + tip + '</span>' +
       '<span class="li-val">' + fmt$(s.val) + ' <span class="li-pct">' + pct.toFixed(0) + '%</span></span>';
     legend.appendChild(li);
   });
-
-  // callout — the insight
-  if (y1.total <= 0) {
-    document.getElementById('callout').innerHTML = 'Turn on a cost category in the customize panel to see an estimate.';
-  } else {
-    const peoplePct = ((y1.people + y1.onboard) / y1.total) * 100;
-    const maintPct = ((y1.maint + y1.onboard) / y1.total) * 100;
-    const licPct = (y1.license / y1.total) * 100;
-    document.getElementById('callout').innerHTML =
-      'People and ramp are <strong>' + peoplePct.toFixed(0) + '%</strong> of year-one cost — of which upgrades, patching, DR and initial ramp alone are <strong>' + maintPct.toFixed(0) + '%</strong>' +
-      (S.deploy !== 'community' ? '. The license you actually get quoted is <strong>' + licPct.toFixed(0) + '%</strong>.' : '. The "free" tier still costs ' + fmt$(y1.total) + '/yr to operate.');
-  }
 
   // 3-year table
   const tbl = document.getElementById('years-table');
@@ -1181,13 +1171,10 @@ function renderNotes() {
   const notes = [
     { src: true,  html: 'HCP Vault Dedicated cluster pricing and the <strong>$72.92 per-client monthly fee</strong> are taken from <a href="https://www.ibm.com/products/hashicorp/pricing" target="_blank" rel="noopener">IBM\'s published HashiCorp Vault pricing</a>. The per-client fee is editable, and negotiated or Enterprise rates often run higher.' },
     { src: true,  html: 'HCP counts a <a href="https://developer.hashicorp.com/vault/docs/concepts/billing/clients/counting" target="_blank" rel="noopener">billable client</a> per active billing period, not once for its lifetime. The client-period multiplier (default 1×) models that amplifier — raise it if clients churn across periods.' },
-    { src: false, html: 'The <strong>25–60% renewal / hidden-cost uplift</strong> reflects widely reported procurement data. The default applies the conservative 25% floor; real renewals are frequently higher.' },
-    { src: true,  html: '<strong>Add-on modules &amp; premium support</strong> is an editable uplift on the license. <a href="https://developer.hashicorp.com/vault/docs/enterprise/namespaces" target="_blank" rel="noopener">Namespaces</a>, <a href="https://developer.hashicorp.com/vault/docs/enterprise/hsm" target="_blank" rel="noopener">HSM/FIPS</a>, <a href="https://developer.hashicorp.com/vault/docs/enterprise/replication" target="_blank" rel="noopener">performance &amp; disaster-recovery replication</a>, and <a href="https://developer.hashicorp.com/vault/docs/enterprise/sentinel/properties" target="_blank" rel="noopener">Sentinel policies</a> require <a href="https://developer.hashicorp.com/vault/tutorials/get-started/available-editions" target="_blank" rel="noopener">Vault Enterprise</a> rather than the lower tiers, and paid support tiers cost extra. Adjacent operational tooling (external-secrets / CSI / agent injector and observability) is real cost too, but it is captured here as engineering and maintenance labor rather than double-counted.' },
     { src: false, html: 'Engineering cost is split into <strong>steady-state operations</strong> and <strong>upgrades, patching &amp; DR</strong> — the latter is the most frequently cited ongoing Vault burden. The default attributes 40% of engineering time to it.' },
     { src: false, html: 'Vault Enterprise self-hosted license is <strong>estimated</strong> — HashiCorp publishes no list price for the <a href="https://developer.hashicorp.com/vault/tutorials/get-started/available-editions" target="_blank" rel="noopener">self-managed editions</a>. We model a baseline plus a modest per-client uplift as a placeholder. Replace it with your actual quote.' },
     { src: false, html: 'Self-hosted infrastructure is <strong>estimated</strong> per cluster (a high-availability node cluster plus load balancer, storage, and backups).' },
     { src: false, html: 'Fully-loaded engineer cost is an <strong>estimate</strong> (base plus benefits and overhead). FTE counts are deliberately conservative for each profile.' },
-    { src: false, html: 'Onboarding (0→1) and any <strong>professional-services / onboarding fee</strong> are charged once, in year 1. Larger, multi-environment deployments commonly take several months to reach production and often carry an implementation fee.' },
   ];
   document.getElementById('notes-list').innerHTML = notes.map(n =>
     '<li class="' + (n.src ? 'sourced' : '') + '">' + n.html + '</li>').join('');
@@ -1207,8 +1194,6 @@ function syncControls() {
   setRange('maintshare', Math.round(S.maintShare * 100), v => v + '%');
   setRange('onboard', S.onboard, v => v === 0 ? 'instant' : trimNum(v) + ' mo · ' + onboardTag(v));
   setRange('psfee', S.psFee, v => Number(v) === 0 ? 'none' : fmt$k(v));
-  setRange('addon', S.addon, v => Number(v) === 0 ? 'none' : '+' + v + '%');
-  setRange('uplift', S.uplift, v => v + '%');
   setRange('growth', S.growth, v => v + '% / yr');
 
   // per-client fee: list price by default, optional custom quote
@@ -1261,8 +1246,6 @@ function wire() {
   bind('salary', 'salary', Number);
   bind('onboard', 'onboard', Number);
   bind('psfee', 'psFee', Number);
-  bind('addon', 'addon', Number);
-  bind('uplift', 'uplift', Number);
   bind('growth', 'growth', Number);
   document.getElementById('maintshare').addEventListener('input', e => { S.maintShare = Number(e.target.value) / 100; markCustom(); render(); });
 
